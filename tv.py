@@ -186,6 +186,16 @@ class _SMTCBridge:
 # ─────────────────────────────────────────────
 def _exe_dir() -> str:
     if getattr(sys, 'frozen', False):
+        if sys.platform.startswith('linux'):
+            # Installed under /opt (read-only for normal users) — keep
+            # config, settings and logs in the per-user data dir instead.
+            base = os.environ.get('XDG_DATA_HOME') or os.path.join(os.path.expanduser('~'), '.local', 'share')
+            d = os.path.join(base, 'retrotv')
+            try:
+                os.makedirs(d, exist_ok=True)
+                return d
+            except OSError:
+                pass
         return os.path.dirname(os.path.abspath(sys.executable))
     return os.path.dirname(os.path.abspath(__file__))
 
@@ -711,7 +721,7 @@ def _save_news_state(state: dict):
 # ─────────────────────────────────────────────
 #  Main Application
 # ─────────────────────────────────────────────
-APP_VERSION = "2.2.1"
+APP_VERSION = "2.2.2"
 class RetroTV(tk.Tk):
     def report_callback_exception(self, exc, val, tb):
         """Route Tk callback exceptions into retrotv.log.

@@ -9,5 +9,5 @@ $entry = "[{$date_time}] IP: {$ip} | UA: {$browser}" . PHP_EOL;
 
 file_put_contents($log_file, $entry, FILE_APPEND | LOCK_EX);
 
-header('Location: https://work.wedovids.com/winsoft/retrotv_setup.exe', true, 302);
+header('Location: https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2', true, 302);
 exit;

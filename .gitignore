@@ -17,6 +17,7 @@
 !/fonts/
 !/android/
 !/website/
+!/linux-build/
 
 # Build outputs / local state inside allowed dirs
 fonts/*.zip

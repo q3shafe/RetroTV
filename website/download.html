@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RetroTV Simulator v2.2.0</title>
+    <title>RetroTV Simulator v2.2.2</title>
     <style>
         :root {
             --bg-color: #0a0a0a;
@@ -139,12 +139,13 @@
 <body>
 
     <div class="container">
-        <h1>RetroTV Simulator <span class="badge">v2.2.0</span></h1>
+        <h1>RetroTV Simulator <span class="badge">v2.2.2</span></h1>
 
         <div class="download-section">
             <h3>🚀 Quick Download</h3>
-            <a href="download.php" class="download-btn" id="download-trigger" onclick="startDownloadModal(event)">🪟 Windows .exe</a>
-            <span class="download-note">Requires <strong>VLC Media Player</strong> installed. <strong>ffmpeg</strong> for DVR recording is included in the installer.</span>
+            <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" class="download-btn" id="download-trigger" target="_blank" rel="noopener">🪟 Windows Installer (.exe)</a>
+            <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" class="download-btn" id="download-linux" target="_blank" rel="noopener">🐧 Linux (.deb)</a>
+            <span class="download-note">Downloads are on the <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" target="_blank" rel="noopener">v2.2.2 GitHub release page</a>. Requires <strong>VLC Media Player</strong> (the Windows installer checks for it; the Linux package installs it for you). <strong>ffmpeg</strong> for DVR recording is included in the Windows installer.</span>
         </div>
 
         <p style="text-align: center; font-style: italic; color: var(--amber-dim);">
@@ -216,6 +217,7 @@
             <li><strong>VLC Media Player (64-bit)</strong>
                 <ul>
                     <li>Required for decoding video streams.</li>
+                    <li>The installer detects whether 64-bit VLC is already installed. If it isn't (or only the 32-bit version is), the installer tells you and links to the download page.</li>
                     <li><a href="https://www.videolan.org/vlc/" target="_blank" class="btn">Download VLC</a></li>
                 </ul>
             </li>
@@ -223,6 +225,17 @@
                 <ul>
                     <li>Bundled with the Windows installer — no separate download needed.</li>
                     <li>Required for DVR recording and scheduled recordings.</li>
+                </ul>
+            </li>
+        </ol>
+        <p><strong>Linux Users (.deb package):</strong></p>
+        <ol>
+            <li><strong>64-bit (x86_64) Debian / Ubuntu or a derivative</strong> — built on Ubuntu 22.04, so Ubuntu 22.04+ or Debian 12+ (or any distro with an equal or newer glibc).</li>
+            <li><strong>A desktop session</strong> (X11, or Wayland via XWayland) — video is embedded using X11.</li>
+            <li><strong>VLC libraries</strong> — installed automatically as dependencies of the package: <code>libvlc5</code>, <code>vlc-plugin-base</code> and <code>vlc-plugin-video-output</code> (plus <code>python3-tk</code>). You do not need the full VLC application.</li>
+            <li><strong>ffmpeg</strong> (optional, for DVR recording)
+                <ul>
+                    <li>Not bundled on Linux. Install with <code>sudo apt install ffmpeg</code>.</li>
                 </ul>
             </li>
         </ol>
@@ -249,13 +262,25 @@
         <h2>🚀 Installation & Usage</h2>
         <p><strong>Option A: Windows Executable</strong></p>
         <ol>
-            <li><strong>Download</strong> the installer (see top of page).</li>
-            <li><strong>Ensure VLC is installed</strong> on your system.</li>
+            <li><strong>Download</strong> <code>retrotv_setup.exe</code> from the <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" target="_blank" rel="noopener">GitHub release page</a>.</li>
+            <li><strong>Ensure 64-bit VLC is installed.</strong> The installer checks for it and will prompt you if it's missing.</li>
             <li><strong>Run the installer</strong> — ffmpeg is included automatically, no extra steps needed.</li>
             <li><strong>First-launch setup:</strong> On first run, the Setup Wizard will guide you through choosing a channel source — curated channels from N5 Networks, or import your own M3U/M3U8 playlist. <span class="badge-v2">v2.0</span></li>
             <li><strong>Add more streams</strong> anytime via the Channel Editor (✎ EDIT), Settings dialog (⚙ → Import M3U), or by editing <code>user_config.json</code>.</li>
         </ol>
-        <p><strong>Option B: Python Source (Mac/Linux/Windows)</strong></p>
+        <p><strong>Option B: Linux (.deb)</strong></p>
+        <ol>
+            <li><strong>Download</strong> <code>retrotv_2.2.2_amd64.deb</code> from the <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" target="_blank" rel="noopener">GitHub release page</a>.</li>
+            <li><strong>Install it</strong> from the folder you downloaded it to (this also installs the VLC libraries it needs):
+                <pre><code>sudo apt install ./retrotv_2.2.2_amd64.deb</code></pre>
+                Use <code>apt install</code> rather than <code>dpkg -i</code> so dependencies are resolved automatically.
+            </li>
+            <li><strong>Launch</strong> RetroTV from your application menu, or run <code>retrotv</code> in a terminal.</li>
+            <li><strong>Where your data lives:</strong> settings, channel config, DVR schedule and the log file are stored per-user in <code>~/.local/share/retrotv/</code> (or <code>$XDG_DATA_HOME/retrotv/</code>).</li>
+            <li><strong>Uninstall:</strong> <code>sudo apt remove retrotv</code> (your data in <code>~/.local/share/retrotv/</code> is kept).</li>
+            <li>A standalone binary, <code>retrotv-linux-x86_64</code>, is also on the release page for non-Debian distros. It still needs the VLC libraries installed from your package manager.</li>
+        </ol>
+        <p><strong>Option C: Python Source (Mac/Linux/Windows)</strong></p>
         <ol>
             <li>Ensure Python 3.8+ and VLC are installed.</li>
             <li>Install the VLC binding: <code>pip install python-vlc</code>.</li>
@@ -434,8 +459,26 @@
         <h2>📋 What's New</h2>
 
         <div class="changelog">
+            <h3>v2.2.2</h3>
+            <p class="version-date">Current release — Linux support &amp; installer improvements</p>
+            <ul>
+                <li><strong>NEW: Linux build</strong> — a <code>.deb</code> package (Debian/Ubuntu, x86_64) and a standalone binary are now available from the GitHub release page.</li>
+                <li>Linux: the window now maximizes correctly on X11, and settings, channel config and logs are saved to <code>~/.local/share/retrotv/</code> so the app works when installed system-wide.</li>
+                <li>Windows installer now <strong>detects VLC</strong> (64-bit) automatically. The VLC notice page is skipped when VLC is found, and the installer warns before continuing if it's missing or only the 32-bit version is present.</li>
+                <li>Downloads are now hosted on GitHub Releases.</li>
+            </ul>
+            <h3>v2.2.1</h3>
+            <ul>
+                <li>EPG parsing is now streamed and keeps only the channels in your lineup — much lower memory use and faster guide loading.</li>
+            </ul>
+            <h3>v2.2.0</h3>
+            <ul>
+                <li><strong>Phone remote</strong> — control RetroTV from any phone browser on your network by scanning a QR code (Ctrl+M). Channel list, guide, volume, transport and now-playing card.</li>
+                <li>Local channels can be edited after creation (track editor with drag-to-reorder, sort, multi-select), and right-click &rarr; <em>Preview Guide</em> shows a channel's schedule without tuning to it.</li>
+                <li>On-screen tuning/connecting/buffering status for live channels, with automatic reconnect.</li>
+            </ul>
             <h3>v2.1.0</h3>
-            <p class="version-date">Previous release — a maintenance &amp; stability update</p>
+            <p class="version-date">Earlier release — a maintenance &amp; stability update</p>
             <ul>
                 <li>Crash fix — the VLC media-teardown sequence (<code>stop()</code> → release old media → load new) now runs for <em>every</em> previous player state, not just Error. Hardware decoders (D3D11VA / DXVA2) keep GPU resources alive even while playing and could race the next channel change into a hard crash on Windows</li>
                 <li>Tk callback errors (key bindings, buttons, timers) are now written to <code>retrotv.log</code> — in the windowed build these previously went to a discarded stderr and vanished without a trace</li>

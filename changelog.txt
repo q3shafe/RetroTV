@@ -1,6 +1,14 @@
 RetroTV Changelog
 =================
 
+2.2.2
+-----
+- NEW: Linux build - a .deb package (Debian/Ubuntu, x86_64) and a standalone binary.
+- Linux: the window maximizes correctly on X11 (state('zoomed') is Windows-only).
+- Linux: settings, channel config, DVR schedule and log are stored in ~/.local/share/retrotv/ (or $XDG_DATA_HOME/retrotv/) instead of next to the executable, so a system-wide install works for normal users.
+- Windows installer now detects 64-bit VLC. The VLC notice page is skipped when VLC is found; if it is missing (or only 32-bit VLC is present) the installer says so and asks before continuing.
+- Downloads are now hosted on GitHub Releases.
+
 2.2.1
 -----
 - EPG parsing is now streamed and keeps only the channels in your lineup, for much lower memory use and faster guide loading.
