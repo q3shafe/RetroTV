@@ -1977,7 +1977,15 @@ class RetroTV(tk.Tk):
             sx = saved_pos.get('x', 0) + 100
             sy = saved_pos.get('y', 0) + 100
             self.geometry(f"960x640+{sx}+{sy}")
-        self.after(50, lambda: self.state('zoomed'))
+        def _maximize():
+            try:
+                self.state('zoomed')  # Windows / macOS
+            except tk.TclError:
+                try:
+                    self.attributes('-zoomed', True)  # X11 / Linux
+                except tk.TclError:
+                    pass
+        self.after(50, _maximize)
         self.minsize(640, 480)
         self.resizable(True, True)
         self.after(100, self._set_window_icon)
