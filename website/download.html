@@ -143,9 +143,10 @@
 
         <div class="download-section">
             <h3>🚀 Quick Download</h3>
-            <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" class="download-btn" id="download-trigger" target="_blank" rel="noopener">🪟 Windows Installer (.exe)</a>
-            <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" class="download-btn" id="download-linux" target="_blank" rel="noopener">🐧 Linux (.deb)</a>
+            <a href="download.php?p=win" class="download-btn" id="download-trigger" onclick="startDownloadModal(event, 'win')">🪟 Windows Installer (.exe)</a>
+            <a href="download.php?p=linux" class="download-btn" id="download-linux" onclick="startDownloadModal(event, 'linux')">🐧 Linux (.deb)</a>
             <span class="download-note">Downloads are on the <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" target="_blank" rel="noopener">v2.2.2 GitHub release page</a>. Requires <strong>VLC Media Player</strong> (the Windows installer checks for it; the Linux package installs it for you). <strong>ffmpeg</strong> for DVR recording is included in the Windows installer.</span>
+            <span class="download-note">⭐ RetroTV is open source — source code, all releases and the issue tracker are on <a href="https://github.com/q3shafe/RetroTV" target="_blank" rel="noopener">GitHub (q3shafe/RetroTV)</a>.</span>
         </div>
 
         <p style="text-align: center; font-style: italic; color: var(--amber-dim);">
@@ -262,7 +263,7 @@
         <h2>🚀 Installation & Usage</h2>
         <p><strong>Option A: Windows Executable</strong></p>
         <ol>
-            <li><strong>Download</strong> <code>retrotv_setup.exe</code> from the <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" target="_blank" rel="noopener">GitHub release page</a>.</li>
+            <li><strong>Download</strong> <code>retrotv_setup.exe</code> from the <a href="download.php?p=win">GitHub release page</a>.</li>
             <li><strong>Ensure 64-bit VLC is installed.</strong> The installer checks for it and will prompt you if it's missing.</li>
             <li><strong>Run the installer</strong> — ffmpeg is included automatically, no extra steps needed.</li>
             <li><strong>First-launch setup:</strong> On first run, the Setup Wizard will guide you through choosing a channel source — curated channels from N5 Networks, or import your own M3U/M3U8 playlist. <span class="badge-v2">v2.0</span></li>
@@ -270,7 +271,7 @@
         </ol>
         <p><strong>Option B: Linux (.deb)</strong></p>
         <ol>
-            <li><strong>Download</strong> <code>retrotv_2.2.2_amd64.deb</code> from the <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" target="_blank" rel="noopener">GitHub release page</a>.</li>
+            <li><strong>Download</strong> <code>retrotv_2.2.2_amd64.deb</code> from the <a href="download.php?p=linux">GitHub release page</a>.</li>
             <li><strong>Install it</strong> from the folder you downloaded it to (this also installs the VLC libraries it needs):
                 <pre><code>sudo apt install ./retrotv_2.2.2_amd64.deb</code></pre>
                 Use <code>apt install</code> rather than <code>dpkg -i</code> so dependencies are resolved automatically.
@@ -740,9 +741,12 @@
 
     <script>
         var _downloadTimer = null;
+        var _downloadUrl = 'download.php';
 
-        function startDownloadModal(e) {
+        function startDownloadModal(e, platform) {
             e.preventDefault();
+            _downloadUrl = 'download.php' + (platform ? '?p=' + platform : '');
+            document.getElementById('modal-direct-link').href = _downloadUrl;
             document.getElementById('download-modal').classList.add('active');
             var count = 5;
             var el = document.getElementById('modal-countdown');
@@ -753,7 +757,7 @@
                 el.textContent = count;
                 if (count <= 0) {
                     clearInterval(_downloadTimer);
-                    window.location.href = 'download.php';
+                    window.location.href = _downloadUrl;
                 }
             }, 1000);
         }

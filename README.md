@@ -2,9 +2,15 @@
 
 A Python desktop application that simulates the experience of watching a 1990s CRT television. RetroTV plays live internet streams and local video playlists through a nostalgic amber-glow interface complete with scanlines, static noise, and commercial breaks.
 
-**Current version: 2.2.1**
+**Current version: 2.2.2**
 
 **Website: [https://retrotv.n5net.com](https://retrotv.n5net.com)**
+
+<p align="center">
+  <a href="https://retrotv.n5net.com">
+    <img src="https://retrotv.n5net.com/rtv-guide.jpg" alt="RetroTV's built-in cable guide (channel 00) with channel logos, program schedules and a live video preview" width="900">
+  </a>
+</p>
 
 ---
 
@@ -12,7 +18,7 @@ A Python desktop application that simulates the experience of watching a 1990s C
 
 - Website & installer download: **[https://retrotv.n5net.com](https://retrotv.n5net.com)**
 - Full documentation: **[https://retrotv.n5net.com/download.html](https://retrotv.n5net.com/download.html)**
-- GitHub releases (Windows installer): **[https://github.com/q3shafe/RetroTV/releases](https://github.com/q3shafe/RetroTV/releases)**
+- GitHub releases (Windows installer, Linux `.deb` and binary): **[https://github.com/q3shafe/RetroTV/releases](https://github.com/q3shafe/RetroTV/releases)**
 - Release history: [`changelog.txt`](changelog.txt)
 
 ---
@@ -30,6 +36,57 @@ The installer (`retrotv_setup.exe`) includes everything you need — no Python o
 - Optional: a pack of 100+ classic commercials (~2 GB) that can be downloaded during setup
 
 The installer targets 64-bit Windows and installs to `C:\RetroTV` by default. A Start Menu shortcut is created automatically, with an optional desktop icon.
+
+---
+
+## Linux
+
+RetroTV runs on Linux as a native `.deb` package (Debian / Ubuntu, 64-bit) or a standalone binary. Download them from the **[GitHub releases page](https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2)**.
+
+**Install the `.deb`** (this also installs the VLC libraries it needs):
+
+```
+sudo apt install ./retrotv_2.2.2_amd64.deb
+```
+
+Use `apt install` rather than `dpkg -i` so dependencies are resolved automatically. Then launch **RetroTV** from your application menu, or run `retrotv`. To remove it: `sudo apt remove retrotv`.
+
+- **Supported systems:** 64-bit (x86_64) Debian/Ubuntu or derivatives. The package is built on Ubuntu 22.04, so Ubuntu 22.04+ / Debian 12+ (or any distro with an equal or newer glibc) is required. A desktop session (X11, or Wayland via XWayland) is needed, as video is embedded using X11.
+- **Dependencies** (installed automatically): `libvlc5`, `vlc-plugin-base`, `vlc-plugin-video-output`, `python3-tk`. The full VLC application is not required.
+- **Your data** (settings, channel config, DVR schedule, log) is stored per-user in `~/.local/share/retrotv/` (or `$XDG_DATA_HOME/retrotv/`), and is kept when you uninstall.
+- **ffmpeg** is not bundled on Linux. For DVR recording, install it with `sudo apt install ffmpeg`.
+- **Other distros:** use the standalone `retrotv-linux-x86_64` binary from the release page (`chmod +x` it and run it). You still need the VLC libraries from your package manager, or run from source (see [Installation](#installation)).
+
+To build the Linux binary and `.deb` yourself, see [Building for Linux](#building-for-linux).
+
+---
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%">
+      <img src="https://retrotv.n5net.com/rtv-live.jpg" alt="Watching a live channel, with the channel list and control bar">
+      <br><sub><b>Live channels</b> — channel list, DVR, sleep timer and more</sub>
+    </td>
+    <td width="50%">
+      <img src="https://retrotv.n5net.com/rtv-epg.jpg" alt="The schedule overlay showing what's on now and next, over live video">
+      <br><sub><b>EPG schedule overlay</b> — press <code>G</code> on any live channel</sub>
+    </td>
+  </tr>
+</table>
+
+### Phone remote
+
+<p>
+  <img src="https://retrotv.n5net.com/rtv-remote-dialog.png" alt="The Phone Remote pairing dialog with a QR code, web address and pairing code" height="360">
+  &nbsp;&nbsp;
+  <img src="https://retrotv.n5net.com/rtv-remote.jpg" alt="The RetroTV phone remote in a mobile browser" height="360">
+</p>
+
+Press `Ctrl+M`, scan the QR code, and your phone becomes the remote. See [Phone Remote](#phone-remote).
+
+More screenshots and the full feature tour are on the [website](https://retrotv.n5net.com).
 
 ---
 
@@ -62,8 +119,10 @@ The installer targets 64-bit Windows and installs to `C:\RetroTV` by default. A 
 - **Python 3.10+**
 - **VLC Media Player** installed on your system — [Download VLC](https://www.videolan.org/vlc/)
   - The Python architecture (32-bit or 64-bit) must match your VLC installation.
+  - On Linux, install the VLC libraries and Tk: `sudo apt install libvlc5 vlc-plugin-base vlc-plugin-video-output python3-tk` (or your distro's equivalents).
 - **ffmpeg** — required only for DVR recording.
-  - Place `ffmpeg.exe` in the same folder as `tv.py`, or install it so it is on your system `PATH`.
+  - Windows: place `ffmpeg.exe` in the same folder as `tv.py`, or install it so it is on your system `PATH`.
+  - Linux: `sudo apt install ffmpeg`.
 
 ---
 
@@ -89,7 +148,24 @@ The installer targets 64-bit Windows and installs to `C:\RetroTV` by default. A 
 pyinstaller retrotv.spec
 ```
 
-This produces `dist/RetroTV.exe`. The installer script `retrotv.iss` (Inno Setup) expects the exe plus `ffmpeg.exe`, `ffplay.exe` and `ffprobe.exe` in `dist/`, and uses absolute paths — edit them to match your checkout before compiling.
+This produces `dist/RetroTV.exe`. The installer script `retrotv.iss` (Inno Setup) expects the exe plus `ffmpeg.exe`, `ffplay.exe` and `ffprobe.exe` in `dist/`, and uses absolute paths — edit them to match your checkout before compiling. The installer detects whether 64-bit VLC is installed and warns if it is missing.
+
+### Building for Linux
+
+PyInstaller can't cross-compile, so build on Linux (or inside WSL Ubuntu). On Windows, from PowerShell:
+
+```
+wsl -d Ubuntu -u root -- bash /mnt/j/py-git/shafe-tv/linux-build/build-linux.sh
+```
+
+On Linux, just run `bash linux-build/build-linux.sh`. The script installs the build dependencies via `apt`, builds the binary with PyInstaller (`linux-build/retrotv-linux.spec`), and packages the `.deb`. The version comes from `APP_VERSION` in `tv.py`. Output goes to `Output/`:
+
+```
+Output/retrotv-linux-x86_64
+Output/retrotv_<version>_amd64.deb
+```
+
+Build on the oldest distro you want to support, since the binary needs a glibc at least as new as the build machine's.
 
 ---
 
@@ -250,6 +326,7 @@ dvr_scheduler.py       — Standalone background DVR scheduler
 version.json           — Version info used by the update check
 retrotv.spec           — PyInstaller build spec
 retrotv.iss            — Inno Setup installer script
+linux-build/           — Linux build script (binary + .deb) and PyInstaller spec
 fonts/                 — Press Start 2P font (OFL licensed)
 android/               — Android client (Kotlin / Compose)
 website/               — Project website (retrotv.n5net.com)
@@ -281,3 +358,4 @@ retrotv.log            — Application log (rotating, 5 x 1 MB)
 - [Pillow](https://python-pillow.org/) — Watermark rendering
 - [qrcode](https://pypi.org/project/qrcode/) — Phone remote pairing QR code
 - [PyInstaller](https://pyinstaller.org/) / [Inno Setup](https://jrsoftware.org/isinfo.php) — Windows packaging
+- [PyInstaller](https://pyinstaller.org/) / `dpkg-deb` — Linux binary and `.deb` packaging

@@ -5,7 +5,8 @@ $date_time = date('Y-m-d H:i:s');
 $ip        = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $browser   = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
 
-$entry = "[{$date_time}] IP: {$ip} | UA: {$browser}" . PHP_EOL;
+$platform  = (isset($_GET['p']) && in_array($_GET['p'], ['win', 'linux'], true)) ? $_GET['p'] : 'win';
+$entry = "[{$date_time}] [{$platform}] IP: {$ip} | UA: {$browser}" . PHP_EOL;
 
 file_put_contents($log_file, $entry, FILE_APPEND | LOCK_EX);
 

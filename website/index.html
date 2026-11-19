@@ -151,34 +151,58 @@
         radial-gradient(ellipse 60% 50% at 80% 20%, rgba(255,176,0,0.04) 0%, transparent 60%);
     }
 
-    .hero-crt {
-      position: absolute;
-      right: 6%;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 420px;
-      height: 320px;
-      opacity: 0.18;
+    /* Hero screenshot in a CRT-style frame */
+    #hero { gap: 56px; }
+
+    .hero-shot {
+      position: relative;
+      z-index: 2;
+      flex: 1 1 760px;
+      max-width: 860px;
+      min-width: 0;
+      margin: 0;
     }
 
-    .hero-crt-inner {
-      width: 100%;
-      height: 100%;
+    .hero-shot-frame {
+      position: relative;
       border: 3px solid var(--amber-dim);
-      border-radius: 24px;
-      background: radial-gradient(ellipse at center, rgba(255,176,0,0.1) 0%, transparent 70%);
+      border-radius: 14px;
+      overflow: hidden;
+      line-height: 0;
+      background: #000;
       box-shadow:
-        0 0 60px rgba(255,176,0,0.1),
-        inset 0 0 40px rgba(0,0,0,0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+        0 0 70px rgba(255,176,0,0.18),
+        0 20px 60px rgba(0,0,0,0.7);
+    }
+
+    .hero-shot-frame img { width: 100%; height: auto; display: block; }
+
+    /* subtle scanlines + vignette over the screenshot */
+    .hero-shot-frame::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        repeating-linear-gradient(to bottom, rgba(0,0,0,0.10) 0 1px, transparent 1px 3px),
+        radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.35) 100%);
+    }
+
+    .hero-shot figcaption {
+      margin-top: 12px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      color: var(--amber-dim);
+      text-align: center;
+      text-transform: uppercase;
     }
 
     .hero-content {
       position: relative;
       z-index: 2;
       max-width: 680px;
+      flex: 0 1 560px;
     }
 
     .hero-eyebrow {
@@ -473,7 +497,8 @@
       text-transform: uppercase;
     }
 
-    .feature-text h3 .new-tag {
+    .feature-text h3 .new-tag,
+    .shot-remote .remote-text h3 .new-tag {
       font-size: 0.55rem;
       color: var(--red);
       letter-spacing: 2px;
@@ -603,6 +628,56 @@
       border-color: var(--amber-dim);
       box-shadow: 0 0 30px rgba(255,176,0,0.1);
     }
+
+    /* Real screenshots */
+    .screenshots-grid.real { grid-template-columns: repeat(6, 1fr); }
+    .shot-card {
+      position: relative;
+      background: #0d0a06;
+      border: 1px solid rgba(255,176,0,0.12);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .shot-card:hover { border-color: var(--amber-dim); box-shadow: 0 0 30px rgba(255,176,0,0.1); }
+    .shot-card a { display: block; line-height: 0; }
+    .shot-card img { width: 100%; height: auto; display: block; }
+    .shot-guide { grid-column: span 6; }
+    .shot-half  { grid-column: span 3; }
+    .shot-remote {
+      grid-column: span 6;
+      display: flex;
+      align-items: center;
+      gap: 40px;
+      padding: 28px 32px;
+      background: rgba(255,176,0,0.03);
+    }
+    .shot-remote .phone {
+      flex: 0 0 auto;
+      width: 230px;
+      border: 6px solid #1c1710;
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(255,176,0,0.25), 0 10px 40px rgba(0,0,0,0.6);
+      line-height: 0;
+    }
+    .shot-remote .phone img { width: 100%; height: auto; display: block; }
+    .shot-remote .remote-text h3 {
+      font-family: 'IBM Plex Mono', monospace;
+      color: var(--amber);
+      font-size: 1rem;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .shot-remote .remote-text p { color: var(--beige); line-height: 1.7; max-width: 520px; }
+    .shot-card .screenshot-label {
+      position: static;
+      background: #0d0a06;
+      padding: 10px 16px;
+      border-top: 1px solid rgba(255,176,0,0.12);
+    }
+    .shot-remote .pairing { flex: 0 1 380px; line-height: 0; }
+    .shot-remote .pairing img { width: 100%; height: auto; border: 1px solid rgba(255,176,0,0.25); border-radius: 3px; }
 
     .mock-screen {
       width: 100%;
@@ -1122,9 +1197,14 @@
       nav ul { display: none; }
       section { padding: 70px 24px; }
       #hero { padding: 100px 24px 70px; }
-      .hero-crt { display: none; }
+      #hero { flex-direction: column; gap: 40px; }
+      .hero-content, .hero-shot { flex: 0 0 auto; width: 100%; }
       .features-grid { grid-template-columns: 1fr; gap: 36px; }
       .screenshots-grid { grid-template-columns: 1fr; }
+      .screenshots-grid.real { grid-template-columns: 1fr; }
+      .shot-guide, .shot-half, .shot-remote { grid-column: auto; }
+      .shot-remote { flex-direction: column; padding: 24px 20px; gap: 24px; text-align: center; }
+      .shot-remote .pairing { flex: 0 0 auto; width: 100%; max-width: 380px; }
       .setup-steps { grid-template-columns: 1fr; }
       .download-platforms { grid-template-columns: 1fr; }
       .stats-row { flex-wrap: wrap; }
@@ -1155,17 +1235,13 @@
       <li><a href="#screenshots">Preview</a></li>
       <li><a href="#download">Download</a></li>
       <li><a href="download.html">Docs</a></li>
+      <li><a href="https://github.com/q3shafe/RetroTV" target="_blank" rel="noopener">GitHub</a></li>
       <li><a href="#donate">Support</a></li>
     </ul>
   </nav>
 
   <section id="hero">
     <div class="hero-bg"></div>
-    <div class="hero-crt" aria-hidden="true">
-      <div class="hero-crt-inner">
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:3rem;color:rgba(255,176,0,0.3);text-align:center;">📺</div>
-      </div>
-    </div>
     <div class="hero-content">
       <div class="hero-eyebrow">
         <span class="live-dot">ON AIR</span>
@@ -1203,6 +1279,12 @@
         <a href="#features" class="btn-secondary">See All Features</a>
       </div>
     </div>
+    <figure class="hero-shot">
+      <div class="hero-shot-frame">
+        <img src="rtv-guide.jpg" width="1600" height="863" fetchpriority="high" alt="RetroTV's Cable Guide: a scrolling program guide with channel logos, 30-minute time slots and a live video preview" />
+      </div>
+      <figcaption>The built-in cable guide — channel 00</figcaption>
+    </figure>
     <div class="hero-scroll" aria-hidden="true">
       <span>SCROLL</span>
       <div class="hero-scroll-line"></div>
@@ -1538,128 +1620,26 @@
   <section id="screenshots">
     <div class="section-label">App Preview</div>
     <h2 class="section-title">See It <span class="dim">In Action</span></h2>
-    <div class="screenshots-grid">
-      <div class="screenshot-card fade-in">
-        <div class="mock-screen">
-          <div class="mock-screen-tv">
-            <div class="mock-news-bg"></div>
-            <div class="mock-scanlines"></div>
-            <div class="mock-dvr-rec">● REC  00:12:34</div>
-            <div class="mock-osd">03  LIVE STREAM</div>
-            <div class="mock-news-bar">
-              <div class="mock-news-text">LIVE BROADCAST · STREAMING NOW · RETROTV PLAYER ·</div>
-            </div>
-          </div>
-          <div class="mock-bar">
-            <span class="mock-bar-ch">CH 03 · LIVE STREAM · LIVE</span>
-            <div class="mock-bar-dots">
-              <div class="mock-bar-dot"></div>
-              <div class="mock-bar-dot"></div>
-              <div class="mock-bar-dot" style="background:var(--amber)"></div>
-            </div>
-          </div>
-        </div>
-        <div class="screenshot-label">LIVE STREAM + DVR — PRESS R TO RECORD</div>
+    <div class="screenshots-grid real">
+      <div class="shot-card shot-guide fade-in">
+        <a href="rtv-guide.jpg" target="_blank" rel="noopener"><img src="rtv-guide.jpg" width="1600" height="863" loading="lazy" alt="RetroTV Cable Guide (channel 00): a scrolling program guide with channel logos, 30-minute time slots, and a live video preview" /></a>
+        <div class="screenshot-label">CABLE GUIDE (CH 00) — EPG SCHEDULES, LOGOS &amp; LIVE PREVIEW</div>
       </div>
-      <div class="screenshot-card fade-in">
-        <div class="mock-screen">
-          <div class="mock-screen-tv">
-            <div class="mock-movie-bg"></div>
-            <div class="mock-movie-bars"></div>
-            <div class="mock-movie-bars2"></div>
-            <div class="mock-scanlines"></div>
-            <div class="mock-osd">07  MOVIES</div>
-            <div class="mock-playing">
-              <div style="font-size:2rem;opacity:0.15;">🎬</div>
-            </div>
-            <div class="mock-epg-overlay">
-              <div class="mock-epg-overlay-hdr">
-                <span>📺 CH 07 — MOVIES — SCHEDULE</span>
-                <span>✕</span>
-              </div>
-              <div class="mock-epg-overlay-row">
-                <div class="mock-epg-now">
-                  <div style="color:#888;font-size:0.3rem;">▶ NOW PLAYING</div>
-                  <div style="color:#fff;font-weight:bold;">Classic Feature Film</div>
-                  <div style="color:#00ff00;font-size:0.3rem;margin-top:2px;">████████░░░░░</div>
-                </div>
-                <div class="mock-epg-next">
-                  <div style="color:#888;font-size:0.3rem;">NEXT ▶</div>
-                  <div style="color:#ccddff;">Late Night Cinema</div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="mock-bar">
-            <span class="mock-bar-ch">CH 07 · MOVIES · LIVE</span>
-            <div class="mock-bar-dots">
-              <div class="mock-bar-dot" style="background:var(--amber)"></div>
-              <div class="mock-bar-dot"></div>
-              <div class="mock-bar-dot"></div>
-            </div>
-          </div>
-        </div>
+      <div class="shot-card shot-half fade-in">
+        <a href="rtv-live.jpg" target="_blank" rel="noopener"><img src="rtv-live.jpg" width="1600" height="863" loading="lazy" alt="RetroTV playing a live channel with the channel list, control bar and channel banner" /></a>
+        <div class="screenshot-label">LIVE CHANNELS — CHANNEL LIST, DVR, SLEEP TIMER &amp; MORE</div>
+      </div>
+      <div class="shot-card shot-half fade-in">
+        <a href="rtv-epg.jpg" target="_blank" rel="noopener"><img src="rtv-epg.jpg" width="1600" height="863" loading="lazy" alt="RetroTV with the schedule overlay open over live video, showing what's on now and next" /></a>
         <div class="screenshot-label">EPG SCHEDULE OVERLAY — PRESS G TO TOGGLE</div>
       </div>
-      <div class="screenshot-card fade-in">
-        <div class="mock-screen">
-          <div class="mock-screen-tv" style="background: var(--guide-bg); padding: 10px;">
-            <div class="mock-scanlines" style="opacity:0.1;"></div>
-            <div class="mock-guide-header">
-              <span>📺 RETRO TV SIMULATOR</span>
-              <span>v2.0</span>
-            </div>
-            <div style="display:flex; font-family: 'IBM Plex Mono', monospace; font-size: 4px; margin-bottom: 6px; gap:4px;">
-                <div style="flex:1; color: #aaa;">
-                    ◉ LIVE STREAMS<br>
-                    ◉ CHANNEL BUILDER<br>
-                    ◉ DVR RECORDING<br>
-                    ◉ FAVORITES ★<br>
-                    ◉ SLEEP TIMER ⏾
-                </div>
-                <div class="mock-guide-video"></div>
-            </div>
-            <div class="mock-guide-row">
-              <div class="mock-guide-ch">00</div>
-              <div class="mock-guide-name">GUIDE</div>
-              <div class="mock-guide-now">—</div>
-            </div>
-            <div class="mock-guide-row">
-              <div class="mock-guide-ch">01</div>
-              <div class="mock-guide-name">★ NEWS</div>
-              <div class="mock-guide-now">LIVE BROADCAST</div>
-            </div>
-            <div class="mock-guide-row" style="background: #003366;">
-              <div class="mock-guide-ch">02</div>
-              <div class="mock-guide-name">MOVIES</div>
-              <div class="mock-guide-now" style="color:#fff">▶ Classic Film (EPG)</div>
-            </div>
-            <div class="mock-guide-row">
-              <div class="mock-guide-ch">03</div>
-              <div class="mock-guide-name">SPORTS</div>
-              <div class="mock-guide-now">LIVE BROADCAST</div>
-            </div>
-            <div class="mock-guide-row">
-              <div class="mock-guide-ch">04</div>
-              <div class="mock-guide-name">MUSIC</div>
-              <div class="mock-guide-now">LIVE BROADCAST</div>
-            </div>
-             <div class="mock-guide-row">
-              <div class="mock-guide-ch">05</div>
-              <div class="mock-guide-name">VHS MIX</div>
-              <div class="mock-guide-now">▶ Track 3 of 24</div>
-            </div>
-          </div>
-          <div class="mock-bar">
-            <span class="mock-bar-ch">CH 00 · CABLE GUIDE · INFO</span>
-            <div class="mock-bar-dots">
-              <div class="mock-bar-dot"></div>
-              <div class="mock-bar-dot" style="background:var(--amber)"></div>
-              <div class="mock-bar-dot"></div>
-            </div>
-          </div>
+      <div class="shot-card shot-remote fade-in">
+        <div class="phone"><img src="rtv-remote.jpg" width="408" height="853" loading="lazy" alt="RetroTV phone remote in a mobile browser: now playing, pause, channel up/down, volume, full screen, favorite, info and record" /></div>
+        <div class="pairing"><img src="rtv-remote-dialog.png" width="544" height="486" loading="lazy" alt="RetroTV's Phone Remote dialog: a QR code to scan with your phone camera, the web address and a pairing code" /></div>
+        <div class="remote-text">
+          <h3>PHONE REMOTE <span class="new-tag">NEW v2.2</span></h3>
+          <p>Press <strong>Ctrl+M</strong>, scan the QR code with your phone camera, and your phone becomes the remote — channel up/down, play/pause, volume, full screen, favorites, DVR record, a searchable channel list and a scrolling TV guide. It's a web page served from your PC on your local network, so there's nothing to install on the phone.</p>
         </div>
-        <div class="screenshot-label">BUILT-IN GUIDE — EPG SCHEDULES, ICONS, DVR & LIVE PREVIEW</div>
       </div>
     </div>
   </section>
@@ -1676,13 +1656,13 @@
           <span class="platform-icon">🪟</span>
           <div class="platform-name">Windows</div>
           <div class="platform-sub">Windows 10 / 11 · 64-bit · Includes ffmpeg</div>
-          <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" class="btn-download" target="_blank" rel="noopener">▶ Download .exe</a>
+          <a href="download.html" class="btn-download">▶ Download .exe</a>
         </div>
         <div class="platform-card fade-in">
           <span class="platform-icon">🐧</span>
           <div class="platform-name">Linux</div>
           <div class="platform-sub">Debian / Ubuntu · x86_64 · .deb package</div>
-          <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" class="btn-download" target="_blank" rel="noopener">▶ Download .deb</a>
+          <a href="download.html" class="btn-download">▶ Download .deb</a>
         </div>
       </div>
       <p class="download-note">* Requires <a href="https://www.videolan.org/vlc/" target="_blank" style="color:var(--amber-dim);text-decoration:none;">VLC Media Player</a> installed on your system. ffmpeg for DVR recording is included in the Windows installer. The Windows installer checks for VLC and the Linux package installs the VLC libraries for you. Downloads are on the <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" target="_blank" rel="noopener" style="color:var(--amber-dim);text-decoration:none;">v2.2.2 GitHub release page</a>; see the <a href="download.html" style="color:var(--amber-dim);text-decoration:none;">docs</a> for install instructions.</p>
@@ -1729,6 +1709,7 @@
       <a href="#hero">Home</a>
       <a href="#features">Features</a>
       <a href="#download">Download</a>
+      <a href="https://github.com/q3shafe/RetroTV" target="_blank" rel="noopener">GitHub</a>
       <a href="#donate">Donate</a>
     </div>
   </footer>
