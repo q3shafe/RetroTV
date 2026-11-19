@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetroTV Simulator v2.2.0</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #c8b99a;
+            --amber-bright: #ffb000;
+            --amber-dim: #7a5500;
+            --red-glow: #cc2200;
+            --blue-glow: #0088dd;
+            --dark-frame: #1a1a1a;
+            --border-frame: #3d2f1e;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 50%, rgba(0,0,0,0.15));
+            background-size: 100% 4px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 40px;
+            border: 8px solid var(--border-frame);
+            background-color: #050505;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 30px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        h1, h2, h3 { color: var(--amber-bright); text-transform: uppercase; letter-spacing: 2px; }
+        h1 { font-size: 2.5rem; border-bottom: 2px solid var(--amber-dim); padding-bottom: 10px; margin-bottom: 20px; text-shadow: 0 0 5px var(--amber-dim); text-align: center; }
+        h2 { font-size: 1.5rem; margin-top: 30px; border-bottom: 1px dashed var(--amber-dim); padding-bottom: 5px; }
+        p { margin-bottom: 16px; font-size: 1rem; }
+        a { color: var(--amber-bright); text-decoration: none; border-bottom: 1px solid var(--amber-dim); transition: all 0.2s ease; }
+        a:hover { color: #fff; text-shadow: 0 0 8px var(--amber-bright); border-bottom: 1px solid var(--amber-bright); }
+        strong { color: var(--amber-bright); }
+        ul { list-style-type: none; padding-left: 20px; }
+        ul li::before { content: "► "; color: var(--amber-dim); margin-right: 10px; }
+        li { margin-bottom: 10px; }
+        pre { background-color: #000; border: 1px solid var(--amber-dim); padding: 15px; border-radius: 4px; overflow-x: auto; color: var(--amber-bright); font-size: 0.9rem; box-shadow: inset 0 0 10px rgba(255, 176, 0, 0.1); }
+        code { font-family: 'Courier New', Courier, monospace; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { text-align: left; padding: 12px; border: 1px solid var(--dark-frame); }
+        th { background-color: var(--amber-dim); color: #000; font-weight: bold; }
+        tr:nth-child(even) { background-color: #0f0f0f; }
+        .btn { display: inline-block; background-color: var(--amber-dim); color: #000; padding: 10px 20px; font-weight: bold; text-transform: uppercase; border: none; cursor: pointer; text-decoration: none; border-bottom: none; font-family: 'Courier New', Courier, monospace; transition: background 0.2s; }
+        .btn:hover { background-color: var(--amber-bright); color: #000; text-shadow: none; }
+        .badge { background-color: var(--amber-bright); color: #000; padding: 2px 6px; font-size: 0.8em; vertical-align: middle; border-radius: 2px; margin-left: 10px; }
+        .badge-new { background-color: var(--red-glow); color: #fff; padding: 2px 6px; font-size: 0.7em; vertical-align: middle; border-radius: 2px; margin-left: 6px; font-weight: bold; letter-spacing: 1px; }
+        .badge-v2 { background-color: var(--blue-glow); color: #fff; padding: 2px 6px; font-size: 0.7em; vertical-align: middle; border-radius: 2px; margin-left: 6px; font-weight: bold; letter-spacing: 1px; }
+
+        .download-section { text-align: center; margin: 30px 0; padding: 20px; background: rgba(255, 176, 0, 0.05); border: 1px solid var(--amber-dim); border-radius: 8px; }
+        .download-section h3 { margin-top: 0; margin-bottom: 15px; color: var(--amber-bright); font-size: 1.2rem; }
+        .download-btn { display: inline-block; margin: 10px; padding: 15px 30px; font-size: 1.1rem; background-color: var(--amber-bright); color: #000; border-radius: 4px; box-shadow: 0 0 15px rgba(255, 176, 0, 0.3); border: 2px solid transparent; text-decoration: none; }
+        .download-btn:hover { background-color: #ffc933; transform: translateY(-2px); box-shadow: 0 0 25px rgba(255, 176, 0, 0.6); }
+        .download-note { font-size: 0.85rem; color: var(--amber-dim); margin-top: 15px; display: block; }
+
+        .changelog { background: #0a0800; border: 1px solid var(--amber-dim); padding: 20px; border-radius: 4px; margin: 20px 0; }
+        .changelog h3 { margin-top: 0; color: var(--amber-bright); font-size: 1.1rem; border-bottom: 1px dashed var(--amber-dim); padding-bottom: 6px; }
+        .changelog ul li::before { content: "▪ "; color: var(--amber-bright); }
+        .changelog .version-date { color: var(--amber-dim); font-size: 0.85rem; margin-bottom: 8px; }
+
+        @media (max-width: 600px) {
+            .container { margin: 10px; padding: 20px; }
+            h1 { font-size: 1.8rem; }
+            .download-btn { display: block; width: 100%; margin: 10px 0; }
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: #050505;
+            border: 4px solid var(--amber-dim);
+            padding: 40px;
+            max-width: 480px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255, 176, 0, 0.2), inset 0 0 20px rgba(0,0,0,0.6);
+            position: relative;
+        }
+        .modal-box h2 { margin-top: 0; font-size: 1.3rem; }
+        .modal-countdown {
+            font-size: 3rem;
+            color: var(--amber-bright);
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 0 12px var(--amber-bright);
+        }
+        .modal-fallback { font-size: 0.9rem; margin: 10px 0 24px; }
+        .modal-fallback a { font-weight: bold; }
+        .modal-divider {
+            border: none;
+            border-top: 1px dashed var(--amber-dim);
+            margin: 24px 0;
+        }
+        .modal-donate { font-size: 0.9rem; color: var(--text-color); margin-bottom: 16px; }
+        .modal-close {
+            position: absolute;
+            top: 10px; right: 14px;
+            background: none;
+            border: none;
+            color: var(--amber-dim);
+            font-size: 1.2rem;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .modal-close:hover { color: var(--amber-bright); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>RetroTV Simulator <span class="badge">v2.2.0</span></h1>
+
+        <div class="download-section">
+            <h3>🚀 Quick Download</h3>
+            <a href="download.php" class="download-btn" id="download-trigger" onclick="startDownloadModal(event)">🪟 Windows .exe</a>
+            <span class="download-note">Requires <strong>VLC Media Player</strong> installed. <strong>ffmpeg</strong> for DVR recording is included in the installer.</span>
+        </div>
+
+        <p style="text-align: center; font-style: italic; color: var(--amber-dim);">
+            A retro-styled desktop IPTV player and media centre — your streams, your channels, your TV.
+        </p>
+
+        <h2>✨ Features</h2>
+        <ul>
+            <li><strong>Phone Remote:</strong> Control RetroTV from any phone browser on your local network. Click <code>📱</code> (or <code>Ctrl+M</code>) to show a pairing QR code. Disable with <code>"remote_enabled": false</code> in <code>retrotv_settings.json</code>. <span class="badge-v2">v2.2</span></li>
+            <li><strong>Track Editor:</strong> Edit local channels after creation — reorder, sort, insert and remove tracks. <span class="badge-v2">v2.2</span></li>
+            <li><strong>Setup Wizard:</strong> On first launch, RetroTV now shows a guided setup dialog. Choose curated channels from N5 Networks, import your own M3U/M3U8 playlist from a file or URL, and optionally add an EPG source — all before you even see the main screen. No more blank startup on a fresh install. <span class="badge-v2">v2.0</span></li>
+            <li><strong>Channel Builder:</strong> Build custom channels from video files on your computer. Click <code>＋ Add Channel</code> → <code>► OPEN CHANNEL BUILDER</code> to pick files or entire folders, drag to reorder, toggle shuffle and commercial breaks — then save as an M3U playlist in the <code>playlists/</code> folder. No manual file editing required. <span class="badge-v2">v2.0</span></li>
+            <li><strong>M3U Playlist Import:</strong> Import channels directly from local or remote M3U/M3U8 playlists. Available in the Channel Editor (<code>⬇ Import M3U</code>), Settings dialog (<code>⬇ Import M3U…</code>), and the first-run setup wizard. Channel names, stream URLs, and tvg-id EPG IDs are parsed automatically. <span class="badge-v2">v2.0</span></li>
+            <li><strong>Fullscreen Overlay:</strong> Mouse-triggered floating control bar in fullscreen mode. Move your cursor to reveal channel navigation (◀◀ / ▶▶), transport controls (⏮ / ⏸ / ⏭ for local files), seek slider, volume slider, EPG toggle, and exit button. Auto-hides after 3 seconds of inactivity. Works even when VLC's hardware surface absorbs normal mouse events. <span class="badge-v2">v2.0</span></li>
+            <li><strong>EPG Click-to-Record:</strong> Click any programme cell in the EPG guide (CH 00) to see a detail popup showing title, time, category, description, and a one-click <code>● SCHEDULE RECORDING</code> button. Already-scheduled programmes show a red dot indicator in the grid. <span class="badge-v2">v2.0</span></li>
+            <li><strong>Manual DVR Scheduling:</strong> Open <code>📅 DVR SCHED</code> → <code>➕ Manual</code> to set a time-based recording without EPG data. Pick a channel, date, start time, and stop time — RetroTV arms a background timer and starts ffmpeg automatically. <span class="badge-v2">v2.0</span></li>
+            <li><strong>Guide Livestream Preview:</strong> Channel 00 now features a split-screen layout: the bottom two-thirds shows the full EPG grid, while the top third displays a live video preview playing a random channel from your lineup. The preview shows the channel name and is click-to-tune. <span class="badge-v2">v2.0</span></li>
+            <li><strong>EPG Channel Icons:</strong> Network logos from XMLTV <code>&lt;channel&gt;&lt;icon&gt;</code> data are automatically fetched in background threads and displayed in the EPG guide grid. Icons are cached in memory with generation-based invalidation for clean refreshes. <span class="badge-v2">v2.0</span></li>
+            <li><strong>Stream Freeze Detection:</strong> An 8-second watchdog monitors live stream playhead movement. If the stream freezes, RetroTV automatically reconnects with a 10-second safety deadline to prevent infinite retry loops. A stuck-state fix ensures that reconnect attempts that silently fail are retried instead of leaving the channel broken forever. <span class="badge-v2">v2.0</span></li>
+            <li><strong>Drive Pre-Warming:</strong> Local files are pre-read (1 KB) before VLC opens them, triggering the OS to spin up external or sleeping drives. This eliminates the "file not found" errors that occurred when VLC tried to open a file on a drive that wasn't ready yet. <span class="badge-v2">v2.0</span></li>
+            <li><strong>Sleep Timer:</strong> Click <code>⏾ SLEEP</code> to set an auto-shutdown timer — choose from 15, 30, 45, 60, 90, or 120 minutes, or enter a custom duration. When the timer expires, RetroTV closes gracefully. If a DVR recording is active, the app mutes and minimizes instead so your capture finishes cleanly. The countdown is shown on the SLEEP button in real time.</li>
+            <li><strong>Channel Surfing:</strong> Hit the <code>🎲 SURF</code> button to jump to a random channel — automatically avoiding your recently watched stations for a true channel-surfing experience. Never know what's coming next.</li>
+            <li><strong>Recently Watched:</strong> Your last 10 watched channels are remembered across sessions. Filter the sidebar with the <code>◷ HIST</code> button to quickly jump back to stations you were just watching.</li>
+            <li><strong>Settings Dialog:</strong> Click the <code>⚙</code> button to configure RetroTV without editing files. Adjust commercials per break (min/max), EPG refresh interval, 24-hour clock, hardware acceleration, network buffer size, startup behaviour (resume last channel, start fullscreen), always-on-top, screensaver suppression, curated channel list mode, and import M3U playlists.</li>
+            <li><strong>DVR Recording:</strong> Press <code>R</code> or click the <code>● REC</code> button to record any live stream in real time. Recordings are saved as .ts files in a <code>recordings/</code> folder. A blinking ● REC indicator appears on screen while recording. ffmpeg is included with the Windows installer.</li>
+            <li><strong>Scheduled Recordings:</strong> Click any programme cell in the EPG guide (CH 00) to schedule an automatic recording — RetroTV starts and stops ffmpeg at the right times. Or use the Manual Schedule dialog to set a time-based recording. Scheduled entries show a red dot indicator in the guide grid. Pending schedules are re-armed automatically on app launch.</li>
+            <li><strong>Recordings Library:</strong> Click <code>📼 LIBRARY</code> to browse, play, and delete your DVR recordings. Play recordings directly inside RetroTV with full pause and seek support. Active recordings show elapsed time and file size in real time. Click <code>📂 Open Folder</code> to access recordings directly.</li>
+            <li><strong>DVR Schedule Manager:</strong> Click <code>📅 DVR SCHED</code> to view all pending, active, and completed scheduled recordings. Cancel, delete, or add manual entries from a single dashboard. Old entries (7+ days) can be purged with one click.</li>
+            <li><strong>Live EPG Program Guide (Ch 00):</strong> Tune to Channel 00 for a full-screen Electronic Program Guide. Powered by XMLTV data, it displays a scrollable grid of current and upcoming programs with channel icons, titles, times, categories, and progress bars. Includes a live video preview window and click-to-tune on the preview channel.</li>
+            <li><strong>Schedule Overlay:</strong> Press <code>G</code> while watching any channel to see a "Now Playing" / "Up Next" strip at the bottom of the screen. Works for both live channels (EPG schedule with time slots and progress bars) and local playlists (track cards with progress bars). Auto-refreshes every 30 seconds for live channels, every 2 seconds for local playlists.</li>
+            <li><strong>Channel Search:</strong> Type a name or number in the sidebar search box to instantly filter the channel list. A ✕ button clears the search. No more scrolling through a long lineup.</li>
+            <li><strong>Favorites:</strong> Star your favorite channels with <code>F</code> — they appear highlighted with ★ in the sidebar and channel guide. Filter the sidebar to show only favorites with the <code>★ FAV</code> button. Right-click any channel for a quick favorite toggle. Favorites persist by channel name across lineup changes.</li>
+            <li><strong>CC Subtitles:</strong> Toggle closed captions on/off with the <code>CC</code> button. Subtitle state persists across channel changes and is re-applied after VLC loads new media.</li>
+            <li><strong>Custom EPG Sources:</strong> Add your own XMLTV guide data URLs or local .xml files via the built-in EPG Sources Editor (📡 button). Your custom sources are merged with the default guide on every refresh. Click a row to edit, or add/remove/reorder sources. You can also drop an <code>epg.txt</code> file (one XMLTV URL per line) next to the app and those sources are loaded automatically.</li>
+            <li><strong>In-App News Feed:</strong> The app automatically checks for network news and update announcements on startup, displaying them in a retro-styled modal window. Messages are tracked by hash so you only see each one once.</li>
+            <li><strong>Hybrid Media Support:</strong>
+                <ul>
+                    <li><strong>Live Streams:</strong> Tune into any live stream URL (HLS/m3u8, DASH, etc.) via the powerful VLC backend.</li>
+                    <li><strong>Local Files:</strong> Play your own video library using XSPF, M3U, or M3U8 playlists. Mix live channels with your personal media collection.</li>
+                    <li><strong>M3U Import:</strong> Import entire channel lineups from Extended M3U playlists (with tvg-id and channel names) from the Channel Editor, Settings dialog, or Setup Wizard.</li>
+                </ul>
+            </li>
+            <li><strong>Commercial Breaks:</strong> Automatically insert commercial breaks between local playlist tracks. Just add a <code>commercials.xspf</code>, <code>commercials.m3u</code>, or drop video files into a <code>commercials/</code> folder. Commercials per break are configurable in Settings. Commercial state is properly saved — your content position is preserved when the break starts.</li>
+            <li><strong>Channel Editor:</strong> No need to edit JSON files manually! Use the built-in Editor (✎ EDIT button) to add, remove, duplicate, or reorder channels graphically. Import M3U playlists with one click. Use the Channel Builder to create channels from video files. Configure names, URLs, playlists, watermarks, EPG IDs, shuffle, and commercial settings.</li>
+            <li><strong>Network Watermarks:</strong> Assign a transparent PNG "network bug" to any channel in your config. The image overlays the video just like a real TV broadcast. Scales automatically on window resize.</li>
+            <li><strong>Smart Resume & Retry:</strong> Automatically saves your playback position for local files — even mid-commercial-break. Local files retry on error with exponential backoff (up to 3 attempts) to handle drive spin-up or temporary errors. Seeks to the furthest known position on retry so you never rewind.</li>
+            <li><strong>Stream Recovery:</strong> Live channels detect frozen streams (8-second watchdog) and automatically reconnect with deadline-based safeguards. If a stream goes offline, the app shows a clear "CHANNEL OFFLINE" indicator. Stuck-state recovery ensures reconnect attempts don't silently fail.</li>
+            <li><strong>Playlist Modes:</strong> Toggle <strong>Shuffle</strong> mode for your local playlists or play them in order. Commercials can be enabled/disabled per channel. Shuffle order persists per channel across re-tunes.</li>
+            <li><strong>Auto-Updated Lineup:</strong> Channel lists sync automatically in the background. Hit the <code>↺ LINEUP</code> button to manually check for updates. Software update notifications keep you on the latest version. Favorites survive lineup changes.</li>
+            <li><strong>Rotating Log File:</strong> All activity is logged to <code>retrotv.log</code> (5 × 1 MB rotating files). libvlc's internal diagnostics are captured with full vsnprintf formatting. Press <code>Ctrl+L</code> to open the log file. Set <code>RETROTV_LIBVLC_DEBUG=1</code> environment variable for verbose libvlc tracing. Thread exceptions are captured too.</li>
+            <li><strong>Authentic CRT Aesthetic:</strong> Immersive amber phosphor color palette, animated CRT scanlines, and "static" transition effects between channels. Volume OSD with amber → yellow → red gradient.</li>
+            <li><strong>Interactive Controls:</strong>
+                <ul>
+                    <li><strong>Channel Navigation:</strong> Prev/Next buttons, direct channel number entry, or click the sidebar list. Double-click the video area for fullscreen. 🎲 SURF for random channel hopping.</li>
+                    <li><strong>Transport Controls:</strong> Seek through local files with the playhead slider. Skip tracks using Prev/Next buttons. Play/Pause for local files and DVR recordings.</li>
+                    <li><strong>Volume OSD:</strong> A visual volume bar overlay appears when adjusting volume — amber → yellow → red gradient with segment markers and speaker glyph.</li>
+                    <li><strong>Fullscreen Overlay:</strong> In fullscreen, move the mouse to reveal a floating control bar with channel navigation, seek slider, volume, and more. Auto-hides after 3 seconds. <span class="badge-v2">v2.0</span></li>
+                    <li><strong>Sidebar:</strong> Click ◀ HIDE to collapse the sidebar for a wider view. Drag the resize sash to adjust sidebar width. Filter by ★ FAV or ◷ HIST.</li>
+                    <li><strong>Keyboard & Media Keys:</strong> Full support for Arrow keys, <code>F</code> (favorites), <code>G</code> (schedule overlay), <code>R</code> (DVR record), <code>Space</code> (play/pause), <code>CC</code>, and Windows Media Keys (Play/Pause, Next/Prev, Volume, Mute).</li>
+                </ul>
+            </li>
+            <li><strong>Fullscreen Mode:</strong> Press <code>F11</code> or double-click the video area to enter immersive fullscreen. The app suppresses the screensaver while watching. Multi-monitor aware with proper monitor detection. Mouse-triggered overlay gives you full control without leaving fullscreen.</li>
+        </ul>
+
+        <h2>⚙️ System Requirements</h2>
+        <p><strong>Windows Users (Standalone Executable):</strong></p>
+        <ol>
+            <li><strong>Windows 10 or 11</strong></li>
+            <li><strong>VLC Media Player (64-bit)</strong>
+                <ul>
+                    <li>Required for decoding video streams.</li>
+                    <li><a href="https://www.videolan.org/vlc/" target="_blank" class="btn">Download VLC</a></li>
+                </ul>
+            </li>
+            <li><strong>ffmpeg</strong> (included in installer)
+                <ul>
+                    <li>Bundled with the Windows installer — no separate download needed.</li>
+                    <li>Required for DVR recording and scheduled recordings.</li>
+                </ul>
+            </li>
+        </ol>
+        <p><strong>Mac / Linux Users (Python Source):</strong></p>
+        <ol>
+            <li><strong>Python 3.8+</strong></li>
+            <li><strong>VLC Media Player</strong> installed on your system.</li>
+            <li><strong>python-vlc</strong> module:
+                <pre><code>pip install python-vlc</code></pre>
+            </li>
+            <li><strong>ffmpeg</strong> (for DVR recording)
+                <ul>
+                    <li>Install via your package manager (e.g. <code>brew install ffmpeg</code> or <code>apt install ffmpeg</code>).</li>
+                </ul>
+            </li>
+            <li><strong>Pillow (Optional):</strong> Recommended for transparent PNG watermarks and EPG channel icons.
+                <pre><code>pip install Pillow</code></pre>
+            </li>
+            <li><strong>screeninfo (Optional):</strong> For proper multi-monitor fullscreen detection.
+                <pre><code>pip install screeninfo</code></pre>
+            </li>
+        </ol>
+
+        <h2>🚀 Installation & Usage</h2>
+        <p><strong>Option A: Windows Executable</strong></p>
+        <ol>
+            <li><strong>Download</strong> the installer (see top of page).</li>
+            <li><strong>Ensure VLC is installed</strong> on your system.</li>
+            <li><strong>Run the installer</strong> — ffmpeg is included automatically, no extra steps needed.</li>
+            <li><strong>First-launch setup:</strong> On first run, the Setup Wizard will guide you through choosing a channel source — curated channels from N5 Networks, or import your own M3U/M3U8 playlist. <span class="badge-v2">v2.0</span></li>
+            <li><strong>Add more streams</strong> anytime via the Channel Editor (✎ EDIT), Settings dialog (⚙ → Import M3U), or by editing <code>user_config.json</code>.</li>
+        </ol>
+        <p><strong>Option B: Python Source (Mac/Linux/Windows)</strong></p>
+        <ol>
+            <li>Ensure Python 3.8+ and VLC are installed.</li>
+            <li>Install the VLC binding: <code>pip install python-vlc</code>.</li>
+            <li>For DVR recording, install ffmpeg via your package manager.</li>
+            <li>Run the app: <code>python retro_tv.py</code>.</li>
+            <li>On first run, the Setup Wizard will help you configure channels.</li>
+        </ol>
+
+        <h2>🎮 Controls</h2>
+        <table>
+            <thead>
+                <tr><th>Action</th><th>Control</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Change Channel / Track</td><td><code>Left</code> / <code>Right</code> Arrow Keys</td></tr>
+                <tr><td>Adjust Volume</td><td><code>Up</code> / <code>Down</code> Arrow Keys or Sidebar Slider</td></tr>
+                <tr><td>Toggle Favorite</td><td><code>F</code> Key</td></tr>
+                <tr><td>Toggle Schedule Overlay</td><td><code>G</code> Key or 📋 GUIDE Button</td></tr>
+                <tr><td>Toggle DVR Recording</td><td><code>R</code> Key or ● REC Button</td></tr>
+                <tr><td>Play / Pause (Local / DVR)</td><td><code>Space</code> Key, ⏸ PAUSE Button, or Media Key <code>Play/Pause</code></td></tr>
+                <tr><td>Toggle Subtitles</td><td><code>CC</code> Button in control bar</td></tr>
+                <tr><td>Toggle Mute</td><td>🔊 Icon or Media Key <code>Mute</code></td></tr>
+                <tr><td>Seek (Local Files)</td><td>Drag the Position Slider in the control bar</td></tr>
+                <tr><td>Fullscreen</td><td><code>F11</code> or Double-Click the video area</td></tr>
+                <tr><td>Exit Fullscreen</td><td><code>Escape</code></td></tr>
+                <tr><td>Fullscreen Overlay</td><td>Move mouse in fullscreen to reveal floating controls <span class="badge-v2">v2.0</span></td></tr>
+                <tr><td>Previous / Next Track</td><td>⏮ PREV / NEXT ⏭ Buttons</td></tr>
+                <tr><td>Open Log File</td><td><code>Ctrl+L</code></td></tr>
+                <tr><td>Open Settings</td><td><code>⚙</code> Button in control bar</td></tr>
+                <tr><td>Channel Surf</td><td>🎲 SURF Button in sidebar</td></tr>
+                <tr><td>Sleep Timer</td><td>⏾ SLEEP Button in control bar</td></tr>
+                <tr><td>Filter Favorites</td><td>★ FAV Button in sidebar</td></tr>
+                <tr><td>Filter Recently Watched</td><td>◷ HIST Button in sidebar</td></tr>
+                <tr><td>Collapse Sidebar</td><td>◀ HIDE Button in sidebar</td></tr>
+                <tr><td>Resize Sidebar</td><td>Drag the sash (border between sidebar and video)</td></tr>
+                <tr><td>Search Channels</td><td>Type in 🔍 search box at top of sidebar</td></tr>
+                <tr><td>Right-Click Channel</td><td>Context menu: Favorite toggle, Tune</td></tr>
+                <tr><td>Schedule Recording</td><td>Click a programme cell in the EPG guide (CH 00)</td></tr>
+                <tr><td>Programme Details</td><td>Click any EPG programme cell to see title, time, description, and schedule button <span class="badge-v2">v2.0</span></td></tr>
+            </tbody>
+        </table>
+
+        <h2>🔴 DVR Recording</h2>
+        <p>RetroTV includes a built-in DVR system for recording live streams. Recordings are saved as transport stream (.ts) files that can be played back in RetroTV or any video player.</p>
+
+        <h3>Quick Record</h3>
+        <ul>
+            <li>Press <code>R</code> or click <code>● REC</code> to start recording the current channel immediately.</li>
+            <li>Press <code>R</code> again or click <code>■ STOP REC</code> to stop. The recording is saved to the <code>recordings/</code> folder.</li>
+            <li>A blinking <code>● REC</code> indicator appears on screen while recording is active.</li>
+        </ul>
+
+        <h3>Scheduled Recording</h3>
+        <ul>
+            <li>Open the EPG guide (tune to CH 00) and click any programme cell to see a detail popup with title, time, category, and description. Click <code>● SCHEDULE RECORDING</code> to set it up. <span class="badge-v2">v2.0</span></li>
+            <li>Scheduled recordings appear with a red dot indicator in the EPG grid.</li>
+            <li>Or use <code>📅 DVR SCHED</code> → <code>➕ Manual</code> to set a manual time-based recording — pick a channel, date, start time, and stop time. <span class="badge-v2">v2.0</span></li>
+            <li>Pending schedules are re-armed automatically when the app starts.</li>
+        </ul>
+
+        <h3>Recordings Library</h3>
+        <ul>
+            <li>Click <code>📼 LIBRARY</code> to open the recordings manager.</li>
+            <li>Browse recordings by date and file size. Play recordings in-app or delete them.</li>
+            <li>Click <code>📂 Open Folder</code> to access the recordings directory directly.</li>
+            <li>While playing a DVR recording, click <code>■ EXIT DVR</code> to return to your live channel.</li>
+            <li>Active recordings show real-time elapsed time and a REC/STOP toggle right in the library dialog. <span class="badge-v2">v2.0</span></li>
+        </ul>
+
+        <p><strong>Note:</strong> DVR recording requires <strong>ffmpeg</strong>. The Windows installer includes ffmpeg automatically — no extra download needed. Mac/Linux users running from source should install ffmpeg via their package manager (e.g. <code>brew install ffmpeg</code> or <code>sudo apt install ffmpeg</code>).</p>
+
+        <h2>⏾ Sleep Timer</h2>
+        <p>RetroTV includes a sleep timer that automatically shuts down the app after a specified duration. This is perfect for falling asleep to your favorite channels.</p>
+        <ul>
+            <li>Click <code>⏾ SLEEP</code> in the control bar to open the timer dialog.</li>
+            <li>Choose a preset duration: 15, 30, 45, 60, 90, or 120 minutes. Or enter a custom number of minutes.</li>
+            <li>The button shows a live countdown (e.g. <code>⏾ 45:23</code>) while the timer is active.</li>
+            <li>Click the countdown button again to cancel the timer.</li>
+            <li><strong>DVR-safe:</strong> If a DVR recording (manual or scheduled) is active when the timer fires, RetroTV mutes the audio and minimizes to the taskbar instead of closing — so your recording finishes cleanly.</li>
+        </ul>
+
+        <h2>🛠️ Custom Channels & Playlists</h2>
+        <p>You can create your own channels using the built-in <strong>Channel Editor</strong> (click the ✎ EDIT button in the control bar). The editor now offers two paths when adding a channel:</p>
+        <ul>
+            <li><strong>Use Existing Playlist / Live URL:</strong> Paste a stream URL or reference an M3U/XSPF playlist file. <span class="badge-v2">v2.0</span></li>
+            <li><strong>Open Channel Builder:</strong> Pick video files or folders from your computer, reorder them, toggle shuffle and commercial breaks, and save as an M3U playlist. <span class="badge-v2">v2.0</span></li>
+        </ul>
+        <p>The editor also supports importing channels from Extended M3U playlists via the <code>⬇ Import M3U</code> button.</p>
+        <p>Alternatively, you can create a <code>user_config.json</code> file manually next to the executable or script. The file supports two formats:</p>
+
+        <p><strong>Format 1 — Simple list (legacy):</strong></p>
+        <pre><code>[
+  {
+    "name": "My Movies",
+    "playlist": "my_movies.xspf",
+    "random": "1",
+    "watermark": "my_logo.png",
+    "channel-id": "MyMovies.us"
+  },
+  {
+    "name": "My Live Stream",
+    "url": "http://192.168.1.100:8080/stream.m3u8"
+  }
+]</code></pre>
+
+        <p><strong>Format 2 — Dict with EPG sources (recommended):</strong></p>
+        <pre><code>{
+  "channels": [
+    {
+      "name": "My Movies",
+      "playlist": "my_movies.xspf",
+      "random": "1",
+      "commercials": "1",
+      "watermark": "my_logo.png",
+      "channel-id": "MyMovies.us",
+      "description": "Classic Films"
+    },
+    {
+      "name": "My Live Stream",
+      "url": "http://192.168.1.100:8080/stream.m3u8",
+      "description": "Webcam"
+    }
+  ],
+  "epg_urls": [
+    "https://example.com/my-guide.xml",
+    "/path/to/local-guide.xml"
+  ]
+}</code></pre>
+
+    <p>The app will automatically load these channels alongside the default lineup. Supported fields:</p>
+    <table>
+        <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>name</code></td><td>Yes</td><td>Display name for the channel</td></tr>
+            <tr><td><code>url</code></td><td>One of url/playlist</td><td>Live stream URL (HLS/m3u8, DASH, etc.)</td></tr>
+            <tr><td><code>playlist</code></td><td>One of url/playlist</td><td>Path to XSPF, M3U, or M3U8 playlist file</td></tr>
+            <tr><td><code>random</code></td><td>No</td><td>Set to <code>"1"</code> to shuffle playlist order</td></tr>
+            <tr><td><code>commercials</code></td><td>No</td><td>Set to <code>"0"</code> to disable commercial breaks on this channel (default: enabled)</td></tr>
+            <tr><td><code>watermark</code></td><td>No</td><td>Path to a transparent PNG shown bottom-right</td></tr>
+            <tr><td><code>channel-id</code></td><td>No</td><td>Matches this channel to an entry in the XMLTV guide data</td></tr>
+            <tr><td><code>description</code></td><td>No</td><td>Short description shown in the channel guide</td></tr>
+            <tr><td><code>color</code></td><td>No</td><td>Hex accent color e.g. <code>"#ff6600"</code></td></tr>
+        </tbody>
+    </table>
+
+    <p>The <code>epg_urls</code> array in the dict format lets you specify additional XMLTV sources that are merged with the built-in guide on startup. You can also manage EPG sources through the <strong>📡 EPG</strong> button in the control bar.</p>
+
+        <h2>📺 Commercial Breaks</h2>
+        <p>To enable automatic commercial breaks between your local video files:</p>
+        <ol>
+            <li>Create a playlist file named <code>commercials.xspf</code>, <code>commercials.m3u</code>, or <code>commercials.m3u8</code> in the same directory as the app.</li>
+            <li>Or, place video files directly into a folder named <code>commercials/</code>.</li>
+            <li>The app will automatically play 2–4 random commercials between every track in your local playlists (configurable in Settings).</li>
+            <li>To disable commercials on a specific channel, set <code>"commercials": "0"</code> in its config entry.</li>
+        </ol>
+
+        <h2>⚙️ Settings</h2>
+        <p>Click the <code>⚙</code> button in the control bar to open the Settings dialog. All settings are saved to <code>retrotv_settings.json</code> and persist across restarts.</p>
+        <table>
+            <thead><tr><th>Setting</th><th>Default</th><th>Description</th></tr></thead>
+            <tbody>
+                <tr><td>Commercials min / max</td><td>2 / 4</td><td>Number of commercials played per break</td></tr>
+                <tr><td>EPG refresh interval</td><td>6 hours</td><td>How often the guide data is refreshed in the background</td></tr>
+                <tr><td>24-hour clock</td><td>Off</td><td>Display times in 24h format in the EPG guide</td></tr>
+                <tr><td>Hardware acceleration</td><td>On</td><td>Use GPU decoding in VLC (requires restart)</td></tr>
+                <tr><td>Network buffer</td><td>1500 ms</td><td>VLC's network/live caching delay (requires restart)</td></tr>
+                <tr><td>Resume last channel</td><td>On</td><td>Automatically tune to the last-watched channel on startup</td></tr>
+                <tr><td>Start fullscreen</td><td>Off</td><td>Launch directly into fullscreen mode</td></tr>
+                <tr><td>Always on top</td><td>Off</td><td>Keep the RetroTV window above other windows</td></tr>
+                <tr><td>Suppress screensaver</td><td>On</td><td>Prevent display sleep while in fullscreen</td></tr>
+                <tr><td>Use curated channels</td><td>Off</td><td>Auto-update channel lineup from the remote server</td></tr>
+                <tr><td>Import M3U</td><td>—</td><td>Import channels from a local or remote M3U/M3U8 playlist <span class="badge-v2">v2.0</span></td></tr>
+            </tbody>
+        </table>
+
+        <h2>📋 What's New</h2>
+
+        <div class="changelog">
+            <h3>v2.1.0</h3>
+            <p class="version-date">Previous release — a maintenance &amp; stability update</p>
+            <ul>
+                <li>Crash fix — the VLC media-teardown sequence (<code>stop()</code> → release old media → load new) now runs for <em>every</em> previous player state, not just Error. Hardware decoders (D3D11VA / DXVA2) keep GPU resources alive even while playing and could race the next channel change into a hard crash on Windows</li>
+                <li>Tk callback errors (key bindings, buttons, timers) are now written to <code>retrotv.log</code> — in the windowed build these previously went to a discarded stderr and vanished without a trace</li>
+                <li>Quitting during a channel load or the volume re-apply retry loop no longer hangs — the worker now checks for shutdown and bails out</li>
+                <li>Shutdown reworked — the window hides immediately, then VLC stop/release, the worker-thread join and DVR cleanup run off the main thread so they can't deadlock against VLC's Win32 message pump; close is guarded against double-invocation</li>
+                <li>Fullscreen toggle debounce rewritten — a single physical double-click can arrive twice (the Tk binding <em>and</em> the VLC window hook); the old guard let the second event immediately undo the first, so fullscreen flickered straight back off</li>
+                <li>Entering fullscreen is now idempotent — a second trigger while already fullscreen used to overwrite the saved window geometry, leaving nothing to restore on exit</li>
+                <li>Fullscreen now opens on the correct monitor — detection uses the window handle instead of a restore-position lookup that was wrong while the window was maximised</li>
+                <li>Double-click-to-fullscreen over the video is more reliable — the Win32 hook now covers every VLC child window and synthesises the double-click from two rapid clicks (VLC's own windows often don't report double-clicks), and is removed during channel changes so it can't fire on a window being torn down</li>
+                <li>DVR recordings now stop by sending <code>q</code> to ffmpeg for a clean shutdown that finalises the file — previously a hard kill could leave a truncated or unplayable recording</li>
+                <li>Recording a custom local-file channel now records the right file; EPG click-to-record and scheduled recordings work for local-file channels too</li>
+                <li>Manual DVR scheduling rejects start times in the past and converts local time to UTC correctly across daylight-saving changes</li>
+                <li>The <code>● REC</code> button resets itself if ffmpeg exits on its own; cancelling an in-progress scheduled recording no longer corrupts its saved status</li>
+                <li>DVR Schedule Manager gains a <code>🗑 Delete</code> button; the Recordings Library gains <code>▶▶ Play All</code> for back-to-back playback</li>
+                <li>Channel 00 guide — the live preview is click-to-tune again, "Now / Up Next" for local channels is consistent whether or not you're tuned in, the preview no longer plays its own commercials, and the clock follows the 24-hour setting</li>
+                <li>EPG sources — added <code>epg.txt</code> (one XMLTV URL per line, placed next to the app), merged with the built-in guide and your custom sources</li>
+                <li>State files (<code>retrotv_resume.json</code>, <code>retrotv_news.json</code>, <code>retrotv_settings.json</code>) are now read and written next to the executable, so your last channel, settings and seen-news survive launching from a shortcut</li>
+                <li>Fresh installs no longer show the news pop-up on first launch</li>
+                <li>The remote curated-lineup check only runs when "Use curated channels" is enabled; for everyone else <code>↺ LINEUP</code> now reloads your own <code>user_config.json</code></li>
+                <li>Every dialog now centres on the monitor RetroTV is running on instead of sometimes opening partly off-screen</li>
+                <li>Hover tooltips added to the control-bar and sidebar buttons; the channel-search <code>✕</code> button no longer overlaps the search field; the fullscreen overlay's play/pause and mute buttons stay in sync with playback</li>
+            </ul>
+        </div>
+
+        <div class="changelog">
+            <h3>v2.0.0</h3>
+            <ul>
+                <li>Setup Wizard — guided first-run dialog: choose curated channels or import M3U/M3U8 playlist (file or URL), optionally add EPG source</li>
+                <li>Channel Builder — build custom channels from video files or folders with drag reorder, shuffle toggle, and commercial break toggle; saves as M3U in playlists/ folder</li>
+                <li>M3U Import in Settings — import M3U/M3U8 playlists directly from the Settings dialog</li>
+                <li>Fullscreen Overlay — mouse-triggered floating control bar in fullscreen with channel nav, seek slider, volume, transport, and EPG toggle; auto-hides after 3 seconds</li>
+                <li>EPG Click-to-Record — click any programme cell in the guide to see a detail popup (title, time, category, description) with one-click Schedule Recording button</li>
+                <li>Manual DVR Scheduling — set time-based recordings from the DVR Schedule Manager without EPG data</li>
+                <li>Guide Livestream Preview — Channel 00 now has a split-screen layout with a live video preview playing a random channel from your lineup, with click-to-tune</li>
+                <li>EPG Channel Icons — network logos from XMLTV data are fetched in background threads and displayed in the guide grid</li>
+                <li>Stream Freeze Detection — 8-second watchdog with 10-second safety deadline; stuck-state fix for silently broken reconnects</li>
+                <li>Drive Pre-Warming — local files are pre-read (1 KB) before VLC opens them to trigger OS drive spin-up</li>
+                <li>Channel Editor type picker — "Add Channel" now offers two paths: Use Existing Playlist/Live URL or Open Channel Builder</li>
+                <li>Improved reconnect logic — deadline-based safeguards prevent infinite retry loops; Error-state player cleanup before loading new media to prevent segfaults</li>
+                <li>Volume re-application after VLC pipeline ready — fixes silent-startup bug where audio_set_volume was ignored</li>
+                <li>Subtitle and mute state re-applied after new media loads</li>
+                <li>Favorites survive lineup changes — tracked by channel name instead of number</li>
+                <li>Commercial break state properly saved — content position preserved when break starts</li>
+                <li>Local retry seeks to furthest known position — never rewinds on retry</li>
+                <li>Win32 double-click hook for VLC child window — fullscreen toggle via double-click even on hardware-accelerated surfaces</li>
+                <li>Mouse position polling for fullscreen overlay — works even when VLC absorbs Win32 mouse messages</li>
+                <li>Improved window cleanup on close — VLC stop/release offloaded to daemon thread to prevent deadlocks</li>
+                <li>Thread exception hooking — uncaught exceptions in background threads are captured in the rotating log</li>
+            </ul>
+        </div>
+
+        <div class="changelog">
+            <h3>v1.9.0</h3>
+            <ul>
+                <li>Sleep Timer — click ⏾ SLEEP to set an auto-shutdown timer (15–120 min or custom); DVR-safe: mutes and minimizes if a recording is active</li>
+                <li>Channel Surfing — 🎲 SURF button jumps to a random channel, avoiding recently watched stations</li>
+                <li>Recently Watched — tracks last 10 channels across sessions; ◷ HIST sidebar filter to quickly return to them</li>
+                <li>Settings Dialog — ⚙ button opens a full settings panel (commercials, EPG, playback, startup, window, channels) without editing JSON</li>
+                <li>Play/Pause with Space bar — pause/resume local files and DVR recordings without reaching for the mouse</li>
+                <li>Stream recovery improvements — 8-second freeze watchdog, deadline-based reconnect safeguards, stuck-state fix for silently broken reconnects</li>
+                <li>libvlc log hook enhancement — C-level vsnprintf formatting for detailed VLC diagnostics, with <code>RETROTV_LIBVLC_DEBUG=1</code> env var for verbose tracing</li>
+                <li>Configurable commercials per break — adjust min/max via Settings dialog instead of editing files</li>
+                <li>Favorites filter button — ★ FAV toggles the sidebar to show only starred channels</li>
+                <li>Improved volume OSD — amber → yellow → red gradient with segment tick marks</li>
+            </ul>
+        </div>
+
+        <div class="changelog">
+            <h3>v1.8.0</h3>
+            <ul>
+                <li>DVR Recording — press <code>R</code> or click ● REC to record any live stream in real time</li>
+                <li>Scheduled Recordings — click programme cells in the EPG guide to schedule automatic recordings</li>
+                <li>Manual Schedule dialog — set time-based recordings for any channel</li>
+                <li>DVR Schedule Manager (📅 DVR SCHED) — view, cancel, and manage all scheduled recordings</li>
+                <li>Recordings Library (📼 LIBRARY) — browse, play, and delete DVR recordings</li>
+                <li>In-app DVR playback with pause/seek and ■ EXIT DVR button</li>
+                <li>Red dot indicator in EPG grid for scheduled recordings</li>
+                <li>● REC on-screen blinking indicator during active recording</li>
+                <li>ffmpeg included in the Windows installer — no separate download needed</li>
+                <li>ffmpeg auto-detection — searches app directory, common install paths, and system PATH</li>
+                <li>M3U playlist import in Channel Editor (⬇ Import M3U button)</li>
+                <li>Extended M3U parser — imports channel names, URLs, and tvg-id from EXTM3U playlists</li>
+                <li>Resizable sidebar — drag the sash between sidebar and video to adjust width</li>
+                <li>Software update checker — notifies when a new version is available</li>
+                <li>Configurable guide livestream URL via <code>guide_livestream_url</code> in tv_config.json</li>
+                <li>Programme detail popup — click EPG cells to see title, time, description, and schedule recording</li>
+                <li>Old schedule entries auto-purged after 7 days</li>
+                <li>DVR recording state survives app restart (pending schedules re-armed on launch)</li>
+            </ul>
+        </div>
+
+        <div class="changelog">
+            <h3>v1.7.5</h3>
+            <ul>
+                <li>Per-channel schedule overlay — press <code>G</code> to see Now/Next for any channel</li>
+                <li>Channel search box in sidebar with instant filtering</li>
+                <li>Favorites system — press <code>F</code> to star channels, ★ shown in guide</li>
+                <li>Right-click context menu on channels in sidebar</li>
+                <li>CC subtitle toggle with persistent state across channels</li>
+                <li>EPG Sources Editor — add custom XMLTV URLs or local .xml files</li>
+                <li>Custom EPG sources via <code>epg_urls</code> in user_config.json</li>
+                <li>Stream recovery — freeze detection and auto-reconnect for live channels</li>
+                <li>Local file retry with exponential backoff (3 attempts)</li>
+                <li>Manual lineup refresh button (↺ LINEUP)</li>
+                <li>Rotating log file (retrotv.log) with Ctrl+L to open</li>
+                <li>Visual volume OSD with amber → yellow → red gradient</li>
+                <li>Sidebar collapse button (◀ HIDE)</li>
+                <li>M3U/M3U8 playlist support (in addition to XSPF)</li>
+                <li>EPG channel icons in the guide grid</li>
+                <li>Channel offline indicator for dead streams</li>
+                <li>user_config.json now supports dict format with <code>channels</code> and <code>epg_urls</code></li>
+                <li>Commercials can be disabled per channel via <code>"commercials": "0"</code></li>
+                <li>libvlc log messages now captured into the rotating log</li>
+            </ul>
+        </div>
+
+        <div class="changelog">
+            <h3>v1.7.2</h3>
+            <ul>
+                <li>Channel Editor with add, remove, reorder, duplicate</li>
+                <li>Network watermarks (transparent PNG overlay)</li>
+                <li>Smart resume for local files</li>
+                <li>In-app news feed modal</li>
+                <li>Schedule overlay (Guide button)</li>
+                <li>Favorites (F key)</li>
+            </ul>
+        </div>
+
+        <div class="changelog">
+            <h3>v1.5.0</h3>
+            <ul>
+                <li>Initial EPG Program Guide (Channel 0)</li>
+                <li>Commercial break simulator</li>
+                <li>XSPF playlist support</li>
+                <li>Auto-updated channel lineup</li>
+                <li>Fullscreen mode with screensaver suppression</li>
+            </ul>
+        </div>
+
+        <h2>⚠️ Troubleshooting</h2>
+        <p><strong>"NO SIGNAL" or Black Screen:</strong></p>
+        <ul>
+            <li>Ensure <strong>VLC Media Player</strong> is installed correctly (64-bit version for 64-bit Windows).</li>
+            <li>For local files, ensure the video format is supported by your VLC installation.</li>
+            <li>Check <code>retrotv.log</code> for error details — press <code>Ctrl+L</code> to open it.</li>
+        </ul>
+        <p><strong>"CHANNEL OFFLINE" or red "NOT BROADCASTING" indicator:</strong></p>
+        <ul>
+            <li>The stream is not currently available. The app will attempt to reconnect automatically.</li>
+            <li>Try tuning away and back. If the problem persists, the stream may be temporarily down.</li>
+            <li>Check <code>retrotv.log</code> for details — it will show the reconnect attempts.</li>
+        </ul>
+        <p><strong>EPG/Guide shows "No schedule available":</strong></p>
+        <ul>
+            <li>The app downloads guide data from a remote server on startup. Ensure you have an internet connection.</li>
+            <li>If using custom channels, ensure the <code>channel-id</code> in your config matches a valid ID in the EPG data.</li>
+            <li>You can add custom EPG sources via the 📡 EPG button or <code>epg_urls</code> in user_config.json.</li>
+        </ul>
+        <p><strong>DVR recording fails or ● REC button shows "ffmpeg Not Found":</strong></p>
+        <ul>
+            <li><strong>Windows:</strong> The installer includes ffmpeg. If you moved the app folder after installing, make sure <code>ffmpeg.exe</code> is still next to <code>retrotv_setup.exe</code> or <code>retrotv.exe</code>.</li>
+            <li><strong>Mac/Linux (from source):</strong> Install ffmpeg via your package manager (e.g. <code>brew install ffmpeg</code> or <code>sudo apt install ffmpeg</code>).</li>
+            <li>You can also download ffmpeg manually from <a href="https://ffmpeg.org/" target="_blank">ffmpeg.org</a> and place it next to the app executable.</li>
+            <li>Check <code>retrotv.log</code> for ffmpeg error output.</li>
+        </ul>
+        <p><strong>Scheduled recording didn't fire:</strong></p>
+        <ul>
+            <li>Ensure the app was running at the scheduled start time. Scheduled recordings only work while RetroTV is open.</li>
+            <li>Check the DVR Schedule Manager (📅 DVR SCHED) — the entry will show "missed" if it was skipped.</li>
+            <li>Ensure ffmpeg is available and the stream URL is still valid.</li>
+            <li>When scheduling manually, the start time must be in the future — RetroTV now rejects past start times. <span class="badge-v2">v2.1</span></li>
+        </ul>
+        <p><strong>A recording is truncated or won't play back:</strong></p>
+        <ul>
+            <li>v2.1 stops ffmpeg gracefully (sends <code>q</code>) so the output file is finalised properly. Recordings from older versions that were interrupted mid-write may still be incomplete. <span class="badge-v2">v2.1</span></li>
+            <li>Try playing the .ts file in VLC directly — a partially written file will often still play up to the point it was cut.</li>
+        </ul>
+        <p><strong>Watermark has black background:</strong></p>
+        <ul>
+            <li>Install the Pillow library (<code>pip install Pillow</code>) for proper transparent PNG support. Without it, transparency is not rendered correctly.</li>
+        </ul>
+        <p><strong>Local file won't play / "BUFFERING (RETRY)" message:</strong></p>
+        <ul>
+            <li>The app will automatically retry up to 3 times with increasing delays for drive spin-up or temporary errors.</li>
+            <li>Ensure the file path in your playlist is correct and the drive is connected.</li>
+            <li>v2.0 pre-reads local files before VLC opens them to spin up sleeping drives. <span class="badge-v2">v2.0</span></li>
+            <li>Check <code>retrotv.log</code> for detailed error messages from VLC.</li>
+        </ul>
+        <p><strong>Volume changes have no effect:</strong></p>
+        <ul>
+            <li>Volume is re-applied after VLC's audio pipeline is fully ready — this fixes a known issue where volume was ignored on startup.</li>
+            <li>If the problem persists, check that your system audio device is working and not muted at the OS level.</li>
+        </ul>
+        <p><strong>Stream freezes and doesn't recover:</strong></p>
+        <ul>
+            <li>RetroTV includes an 8-second freeze watchdog that should auto-reconnect frozen streams.</li>
+            <li>v2.0 adds a 10-second safety deadline and stuck-state recovery to prevent silently broken reconnects. <span class="badge-v2">v2.0</span></li>
+            <li>If the stream repeatedly freezes, it may be a source issue. Try a different stream or check your internet connection.</li>
+            <li>Set the environment variable <code>RETROTV_LIBVLC_DEBUG=1</code> and check <code>retrotv.log</code> for detailed VLC-level diagnostics.</li>
+        </ul>
+        <p><strong>Sleep timer closed the app during a recording:</strong></p>
+        <ul>
+            <li>If a DVR recording was active, the timer should have muted and minimized instead of closing. Check that the recording process was running at the time.</li>
+            <li>Scheduled recordings (pending but not yet started) are also detected — the timer will minimize in this case too.</li>
+        </ul>
+        <p><strong>Fullscreen overlay doesn't appear:</strong></p>
+        <ul>
+            <li>Move your mouse while in fullscreen — the overlay is triggered by cursor movement, not just mouse position. <span class="badge-v2">v2.0</span></li>
+            <li>The overlay auto-hides after 3 seconds of inactivity. Move the mouse again to bring it back.</li>
+            <li>On Windows, cursor position is polled at the OS level so it works even over VLC's hardware-accelerated surface.</li>
+        </ul>
+        <p><strong>First-run wizard doesn't appear:</strong></p>
+        <ul>
+            <li>The wizard only appears when neither <code>tv_config.json</code> nor <code>user_config.json</code> exists — i.e., a completely fresh install. <span class="badge-v2">v2.0</span></li>
+            <li>To trigger it manually, delete both config files and restart the app.</li>
+        </ul>
+        <p><strong>A dialog opened on the wrong screen or partly off-screen:</strong></p>
+        <ul>
+            <li>Fixed in v2.1 — dialogs now centre on the monitor RetroTV is running on. <span class="badge-v2">v2.1</span></li>
+        </ul>
+        <p><strong>Settings or last channel aren't remembered between runs:</strong></p>
+        <ul>
+            <li>v2.1 reads and writes <code>retrotv_resume.json</code>, <code>retrotv_settings.json</code> and <code>retrotv_news.json</code> next to the executable rather than the working directory, so launching from a shortcut now persists state correctly. <span class="badge-v2">v2.1</span></li>
+            <li>Make sure the app folder is writable (not under <code>C:\Program Files</code> without permissions).</li>
+        </ul>
+
+        <h2>💖 Support & Donations</h2>
+        <p>RetroTV is a passion project. If you enjoy the nostalgia trip and want to support development:</p>
+        <p>
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=tnlshafe@gmail.com&lc=US&item_name=RTV-Donation+to+N5+Networks&no_note=0&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHostedGuest" target="_blank" class="btn">♥ Donate via PayPal</a>
+        </p>
+
+        <h2>📜 License</h2>
+        <p>This project is distributed as-is. Please respect the terms of service of any streams you access through this player. VLC is released under the LGPL license. ffmpeg is released under the LGPL/GPL license.</p>
+        
+        <div style="margin-top: 40px; text-align: center; color: var(--amber-dim); font-size: 0.8rem;">
+            © 2026 N5 Networks. All Rights Reserved.
+        </div>
+    </div>
+
+
+    <div class="modal-overlay" id="download-modal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeDownloadModal()">✕</button>
+            <h2>⬇ Your Download is Starting</h2>
+            <div class="modal-countdown" id="modal-countdown">5</div>
+            <p class="modal-fallback">
+                If your download doesn't start automatically,
+                <a href="download.php" id="modal-direct-link">click here</a>.
+            </p>
+            <hr class="modal-divider">
+            <p class="modal-donate">
+                Enjoying RetroTV? Consider supporting the project — it helps keep development going!
+            </p>
+            <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=tnlshafe@gmail.com&lc=US&item_name=RTV-Donation+to+N5+Networks&no_note=0&currency_code=USD&bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHostedGuest"
+               target="_blank" class="btn">♥ Donate via PayPal</a>
+        </div>
+    </div>
+
+    <script>
+        var _downloadTimer = null;
+
+        function startDownloadModal(e) {
+            e.preventDefault();
+            document.getElementById('download-modal').classList.add('active');
+            var count = 5;
+            var el = document.getElementById('modal-countdown');
+            el.textContent = count;
+
+            _downloadTimer = setInterval(function () {
+                count--;
+                el.textContent = count;
+                if (count <= 0) {
+                    clearInterval(_downloadTimer);
+                    window.location.href = 'download.php';
+                }
+            }, 1000);
+        }
+
+        function closeDownloadModal() {
+            clearInterval(_downloadTimer);
+            document.getElementById('download-modal').classList.remove('active');
+            document.getElementById('modal-countdown').textContent = '5';
+        }
+
+        document.getElementById('download-modal').addEventListener('click', function (e) {
+            if (e.target === this) closeDownloadModal();
+        });
+    </script>
+
+</body>
+</html>

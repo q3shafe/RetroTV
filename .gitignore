@@ -1,0 +1,31 @@
+# Whitelist: ignore everything, then allow the project files
+/*
+!/.gitignore
+!/README.md
+!/changelog.txt
+!/requirements.txt
+!/tv.py
+!/remote_control.py
+!/retrotv_epg.py
+!/dvr_scheduler.py
+!/retrotv.spec
+!/retrotv.iss
+!/version.json
+!/retrotv.ico
+!/retrotv.png
+!/guide.mp3
+!/fonts/
+!/android/
+!/website/
+
+# Build outputs / local state inside allowed dirs
+fonts/*.zip
+website/downloads.log
+android/.gradle/
+android/.kotlin/
+android/build/
+android/app/build/
+android/local.properties
+__pycache__/
+*.pyc
+android/app/src/main/assets/tv_config.json

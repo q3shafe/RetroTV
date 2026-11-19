@@ -1,0 +1,60 @@
+RetroTV Changelog
+=================
+
+2.2.1
+-----
+- EPG parsing is now streamed and keeps only the channels in your lineup, for much lower memory use and faster guide loading.
+
+2.2.0
+-----
+Phone remote
+- NEW: RetroTV runs a small web server on your local network so you can control it from any phone browser - no app to install.
+- Pairing: click the new phone button in the control bar (or press Ctrl+M) to see a QR code, the address and an 8-character pairing code. Scan the QR with your phone camera; the phone remembers the pairing. The first run may trigger a Windows Firewall prompt - allow it on Private networks. Phone and PC must be on the same network.
+- Controls: channel up/down, play/pause, volume (buttons + slider), mute, fullscreen, favorite, info/guide, REC, a searchable channel list (tap to tune), and a "now playing" card with the current/next programme and a progress bar.
+- Redesigned for readability: large, plain-language layout instead of the amber retro look. The program or file name is the biggest text and always wraps fully. Big Play/Pause button, channel and track steppers, a volume slider with mute, and labelled Full screen / Favorite / Info / Record buttons. Remote, Guide and Channels tabs; the Channels tab has larger rows, search, and an All / Favorites filter. Follows the phone's dark or light setting. Clear messages if the PC can't be reached or the pairing code is wrong.
+- Local-playlist channels: PREV TRACK / NEXT TRACK buttons, the current file name and position (e.g. "Track 286/703"), and a playhead slider with elapsed/total time. The slider also works for DVR recordings played in the app. These controls are hidden on live channels and the guide.
+- Info button shows the channel's info on the phone as well as the PC overlay. Live channels show the next ~4 hours of schedule with times, category, description and a progress bar; local channels show Now playing and Up next. The panel stays open while changing channels, and opening/closing it on the phone opens/closes the PC overlay.
+- New Guide tab: a scrolling TV guide like channel 0 (without the video), 30-minute columns for the next 4 hours, a red line for the current time, and the current channel highlighted. Tap a programme for its details and a Watch channel button (a red dot marks scheduled recordings); tap a channel name to tune to it. Only built while a phone has the tab open.
+- Added the "Support this project" link at the bottom of the Remote tab.
+- Settings (retrotv_settings.json): "remote_enabled" (default true), "remote_port" (default 8765) and "remote_token" (generated automatically). Set "remote_enabled" to false to turn it off.
+- A second RetroTV instance no longer silently shares the remote's port; it logs that the port is in use and runs without the remote.
+- The QR code needs the "qrcode" Python package (pip install qrcode). Without it the pairing dialog still shows the address and code.
+
+Channels and guide
+- Local channels can be edited after creation: "Edit Tracks" button (or double-click the channel) in the channel manager.
+- Track editor: drag to reorder, move to top/bottom, multi-select moves, A-Z sort, insert after selection, Del to remove, flag/drop missing files.
+- Right-click a channel -> "Preview Guide" to see its schedule/playlist without changing what you're watching. The preview strip is magenta, marked "PREVIEW (not playing - now on CH xx)", with a TUNE button.
+- Live channels show an on-screen loading status (TUNING / CONNECTING / BUFFERING nn% / STARTING) with an elapsed-time counter, RECONNECTING (n/3) during retries, and a "slow stream" hint after 8s. It only appears if loading takes longer than about 0.7s.
+
+Fixes
+- Editing an XSPF channel no longer overwrites the .xspf with M3U data (it is saved as a new M3U in playlists/).
+- The track editor no longer resets a channel's shuffle/commercial settings or ignores name changes.
+
+2.1.0
+-----
+- Volume OSD looks more retro.
+- Shows an on-screen notice in the bottom right when a channel is offline (many are not 24/7).
+- Users can provide their own EPG data for custom channels.
+- Guide button added: guide overlay for the current live channel.
+- Replaced the channel guide with real program times for curated channels.
+- Shuffle ("randomize") works much better.
+- Many bug fixes, including:
+  - Refreshing the channel list could corrupt the JSON config.
+  - Wrong keyboard-shortcut label.
+  - Pause button label could go stale.
+  - Filename label was silently skipped.
+  - Thread-safety fix in the guide commercials.
+  - Watermark reloaded on every resize.
+  - Scanline timer could fire after the window was destroyed.
+  - App closed before the browser opened.
+
+1.5.1
+-----
+- Added a pause button for local file channels.
+- Fixed channel resume data breaking when the channel lineup changed.
+- Fixed favorites getting messed up with a new channel lineup.
+- Removed a distracting channel OSD.
+
+1.5.0
+-----
+- Initial release.
