@@ -1,0 +1,10 @@
+# RetroTV runtime dependencies  (pip install -r requirements.txt)
+# VLC itself must also be installed separately (https://www.videolan.org/vlc/)
+python-vlc==3.0.21203
+Pillow>=10.0          # watermark transparency
+qrcode>=7.4           # phone-remote pairing QR code
+screeninfo>=0.8       # multi-monitor fullscreen
+winsdk==1.0.0b10; sys_platform == "win32"   # Windows media overlay
+
+# Build only (Windows exe):  pyinstaller retrotv.spec
+# pyinstaller>=6.0
