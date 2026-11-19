@@ -12,6 +12,7 @@ A Python desktop application that simulates the experience of watching a 1990s C
 
 - Website & installer download: **[https://retrotv.n5net.com](https://retrotv.n5net.com)**
 - Full documentation: **[https://retrotv.n5net.com/download.html](https://retrotv.n5net.com/download.html)**
+- GitHub releases (Windows installer): **[https://github.com/q3shafe/RetroTV/releases](https://github.com/q3shafe/RetroTV/releases)**
 - Release history: [`changelog.txt`](changelog.txt)
 
 ---
