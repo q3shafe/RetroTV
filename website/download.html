@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RetroTV Simulator v2.2.2</title>
+    <title>RetroTV Simulator v2.2.3</title>
     <style>
         :root {
             --bg-color: #0a0a0a;
@@ -139,13 +139,13 @@
 <body>
 
     <div class="container">
-        <h1>RetroTV Simulator <span class="badge">v2.2.2</span></h1>
+        <h1>RetroTV Simulator <span class="badge">v2.2.3</span></h1>
 
         <div class="download-section">
             <h3>🚀 Quick Download</h3>
             <a href="download.php?p=win" class="download-btn" id="download-trigger" onclick="startDownloadModal(event, 'win')">🪟 Windows Installer (.exe)</a>
             <a href="download.php?p=linux" class="download-btn" id="download-linux" onclick="startDownloadModal(event, 'linux')">🐧 Linux (.deb)</a>
-            <span class="download-note">Downloads are on the <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2" target="_blank" rel="noopener">v2.2.2 GitHub release page</a>. Requires <strong>VLC Media Player</strong> (the Windows installer checks for it; the Linux package installs it for you). <strong>ffmpeg</strong> for DVR recording is included in the Windows installer.</span>
+            <span class="download-note">Downloads are on the <a href="https://github.com/q3shafe/RetroTV/releases/tag/v2.2.3" target="_blank" rel="noopener">v2.2.3 GitHub release page</a>. Requires <strong>VLC Media Player</strong> (the Windows installer checks for it; the Linux package installs it for you). <strong>ffmpeg</strong> for DVR recording is included in the Windows installer.</span>
             <span class="download-note">⭐ RetroTV is open source — source code, all releases and the issue tracker are on <a href="https://github.com/q3shafe/RetroTV" target="_blank" rel="noopener">GitHub (q3shafe/RetroTV)</a>.</span>
         </div>
 
@@ -271,9 +271,9 @@
         </ol>
         <p><strong>Option B: Linux (.deb)</strong></p>
         <ol>
-            <li><strong>Download</strong> <code>retrotv_2.2.2_amd64.deb</code> from the <a href="download.php?p=linux">GitHub release page</a>.</li>
+            <li><strong>Download</strong> <code>retrotv_2.2.3_amd64.deb</code> from the <a href="download.php?p=linux">GitHub release page</a>.</li>
             <li><strong>Install it</strong> from the folder you downloaded it to (this also installs the VLC libraries it needs):
-                <pre><code>sudo apt install ./retrotv_2.2.2_amd64.deb</code></pre>
+                <pre><code>sudo apt install ./retrotv_2.2.3_amd64.deb</code></pre>
                 Use <code>apt install</code> rather than <code>dpkg -i</code> so dependencies are resolved automatically.
             </li>
             <li><strong>Launch</strong> RetroTV from your application menu, or run <code>retrotv</code> in a terminal.</li>
@@ -460,8 +460,15 @@
         <h2>📋 What's New</h2>
 
         <div class="changelog">
+            <h3>v2.2.3</h3>
+            <p class="version-date">Current release — seeking accuracy &amp; phone remote tweaks</p>
+            <ul>
+                <li>The playhead slider (main window and fullscreen overlay) now seeks to exactly where you click, and no longer snaps back briefly after a seek.</li>
+                <li>Phone remote: the position slider moves in 1-second steps instead of 1/1000 of the file, so seeking long videos is far more precise.</li>
+                <li>Phone remote: larger channel up/down buttons.</li>
+            </ul>
             <h3>v2.2.2</h3>
-            <p class="version-date">Current release — Linux support &amp; installer improvements</p>
+            <p class="version-date">Linux support &amp; installer improvements</p>
             <ul>
                 <li><strong>NEW: Linux build</strong> — a <code>.deb</code> package (Debian/Ubuntu, x86_64) and a standalone binary are now available from the GitHub release page.</li>
                 <li>Linux: the window now maximizes correctly on X11, and settings, channel config and logs are saved to <code>~/.local/share/retrotv/</code> so the app works when installed system-wide.</li>

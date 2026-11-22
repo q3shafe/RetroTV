@@ -721,7 +721,7 @@ def _save_news_state(state: dict):
 # ─────────────────────────────────────────────
 #  Main Application
 # ─────────────────────────────────────────────
-APP_VERSION = "2.2.2"
+APP_VERSION = "2.2.3"
 class RetroTV(tk.Tk):
     def report_callback_exception(self, exc, val, tb):
         """Route Tk callback exceptions into retrotv.log.

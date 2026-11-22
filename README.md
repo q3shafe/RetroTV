@@ -2,7 +2,7 @@
 
 A Python desktop application that simulates the experience of watching a 1990s CRT television. RetroTV plays live internet streams and local video playlists through a nostalgic amber-glow interface complete with scanlines, static noise, and commercial breaks.
 
-**Current version: 2.2.2**
+**Current version: 2.2.3**
 
 **Website: [https://retrotv.n5net.com](https://retrotv.n5net.com)**
 
@@ -41,12 +41,12 @@ The installer targets 64-bit Windows and installs to `C:\RetroTV` by default. A 
 
 ## Linux
 
-RetroTV runs on Linux as a native `.deb` package (Debian / Ubuntu, 64-bit) or a standalone binary. Download them from the **[GitHub releases page](https://github.com/q3shafe/RetroTV/releases/tag/v2.2.2)**.
+RetroTV runs on Linux as a native `.deb` package (Debian / Ubuntu, 64-bit) or a standalone binary. Download them from the **[GitHub releases page](https://github.com/q3shafe/RetroTV/releases/tag/v2.2.3)**.
 
 **Install the `.deb`** (this also installs the VLC libraries it needs):
 
 ```
-sudo apt install ./retrotv_2.2.2_amd64.deb
+sudo apt install ./retrotv_2.2.3_amd64.deb
 ```
 
 Use `apt install` rather than `dpkg -i` so dependencies are resolved automatically. Then launch **RetroTV** from your application menu, or run `retrotv`. To remove it: `sudo apt remove retrotv`.
