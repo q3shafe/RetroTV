@@ -268,6 +268,11 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;bac
 .stepper .mid{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-width:0;padding:6px 4px}
 .stepper .mid b{font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
 .stepper .mid span{font-size:14px;color:var(--muted)}
+/* channel up/down: wider, taller, bigger arrows so it stands out from the track stepper */
+.stepper.ch{grid-template-columns:1fr minmax(84px,.8fr) 1fr}
+.stepper.ch button{min-height:84px}
+.stepper.ch button svg{width:34px;height:34px;stroke-width:2.6}
+.stepper.ch .mid b{font-size:30px}
 .vol{display:flex;align-items:center;gap:8px;background:var(--surface);border-radius:var(--radius);padding:4px 16px 4px 6px}
 .vol .mute{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex:none}
 .vol .mute:active{background:var(--surface2)}
@@ -416,7 +421,7 @@ body[data-mode=guide] .not-guide{display:none}
       <span id="ppLabel">Pause</span>
     </button>
 
-    <div class="stepper">
+    <div class="stepper ch">
       <button data-cmd="prev" aria-label="Channel down"><svg class="s" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
       <div class="mid"><b id="stCh">--</b><span>Channel</span></div>
       <button data-cmd="next" aria-label="Channel up"><svg class="s" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg></button>
