@@ -1424,9 +1424,7 @@ class RetroTV(tk.Tk):
         if not self.player or total <= 0 or not self.channels: return
         ch = self.channels[self.current_channel_idx]
         if not (ch.is_local or getattr(self, '_dvr_playing_path', None)): return
-        frac = max(0.0, min(1.0, ms / total))
-        self.playhead_var.set(frac)
-        self._vlc_cmd('seek_frac', frac)
+        self._seek_to_frac(max(0.0, min(1.0, ms / total)))
     def _smtc_sync(self, ch, state, t_ms, total):
         """Push title / status / playhead to the Windows media overlay (1 Hz)."""
         smtc = getattr(self, '_smtc', None)
@@ -1927,6 +1925,13 @@ class RetroTV(tk.Tk):
                         total = self.player.get_length()
                         if total > 0:
                             self.player.set_time(int(args[0] * total))
+                elif cmd == 'seek_ms':
+                    with self._vlc_lock:
+                        total = self.player.get_length()
+                        ms = max(0, int(args[0]))
+                        if total > 0:
+                            ms = min(ms, max(0, total - 500))
+                        self.player.set_time(ms)
                 elif cmd == 'set_subs':
                     with self._vlc_lock:
                         enabled = args[0]
@@ -2902,20 +2907,18 @@ class RetroTV(tk.Tk):
     def _fs_overlay_seek_press(self, event):
         self._fs_overlay_seek_dragging = True
         self._playhead_dragging = True
-        w = event.widget.winfo_width()
-        if w > 0:
-            frac = max(0.0, min(1.0, event.x / w))
+        frac = self._scale_frac_at(event.widget, event)
+        if frac is not None:
             self._playhead_seek_frac = frac
             self.playhead_var.set(frac)
 
     def _fs_overlay_seek_release(self, event):
         self._fs_overlay_seek_dragging = False
         self._playhead_dragging = False
-        w = event.widget.winfo_width()
-        frac = max(0.0, min(1.0, event.x / w)) if w > 0 else self.playhead_var.get()
-        self.playhead_var.set(frac)
-        if self.player:
-            self._vlc_cmd('seek_frac', frac)
+        frac = self._scale_frac_at(event.widget, event)
+        if frac is None:
+            frac = self.playhead_var.get()
+        self._seek_to_frac(frac)
         self._playhead_seek_frac = None
         self._fs_overlay_reset_timer()
         self.after(30, self._fs_overlay_refocus)
@@ -3111,22 +3114,40 @@ class RetroTV(tk.Tk):
         if actual_idx >= len(ch.playlist): return
         name = os.path.splitext(os.path.basename(ch.playlist[actual_idx]))[0]
         self.filename_label.config(text=name, fg=self.AMBER)
-    def _playhead_press(self, event):
-        self._playhead_dragging = True
-        w = self.playhead_slider.winfo_width()
-        if w > 0:
-            frac = max(0.0, min(1.0, event.x / w))
-            self._playhead_seek_frac = frac
-            self.playhead_var.set(frac)
-        else:
-            self._playhead_seek_frac = None
-    def _playhead_release(self, event):
-        self._playhead_dragging = False
-        w = self.playhead_slider.winfo_width()
-        frac = max(0.0, min(1.0, event.x / w)) if w > 0 else (self._playhead_seek_frac or self.playhead_var.get())
+    @staticmethod
+    def _scale_frac_at(widget, event):
+        """Map a mouse event to the 0..1 value of a ttk.Scale.
+
+        ttk.Scale.get(x, y) accounts for the thumb width and trough insets, so
+        the result matches where the thumb is drawn.  Dividing event.x by the
+        widget width puts clicks off target, worst near the ends.
+        """
+        try:
+            return max(0.0, min(1.0, float(widget.get(event.x, event.y))))
+        except Exception:
+            w = widget.winfo_width()
+            return max(0.0, min(1.0, event.x / w)) if w > 0 else None
+    def _seek_to_frac(self, frac):
+        """Seek to frac and keep the poll loop from snapping the playhead back
+        to the old position while VLC is still finishing the seek."""
         self.playhead_var.set(frac)
+        self._seek_hold_until = _time.monotonic() + 1.5
         if self.player:
             self._vlc_cmd('seek_frac', frac)
+    def _playhead_hold(self):
+        return self._playhead_dragging or _time.monotonic() < getattr(self, '_seek_hold_until', 0.0)
+    def _playhead_press(self, event):
+        self._playhead_dragging = True
+        frac = self._scale_frac_at(self.playhead_slider, event)
+        self._playhead_seek_frac = frac
+        if frac is not None:
+            self.playhead_var.set(frac)
+    def _playhead_release(self, event):
+        self._playhead_dragging = False
+        frac = self._scale_frac_at(self.playhead_slider, event)
+        if frac is None:
+            frac = self._playhead_seek_frac or self.playhead_var.get()
+        self._seek_to_frac(frac)
         self._playhead_seek_frac = None
     def _on_playhead_moved(self, val):
         if self._playhead_dragging:
@@ -4226,7 +4247,7 @@ class RetroTV(tk.Tk):
                         return f"{s//3600:02d}:{(s%3600)//60:02d}:{s%60:02d}" if s >= 3600 else f"{s//60:02d}:{s%60:02d}"
                     t_str = fmt(t_ms); tot_str = fmt(total) if total > 0 else "--:--"
                     self.time_label.config(text=f"{t_str}/{tot_str}  [DVR]")
-                    if total > 0 and not self._playhead_dragging: self.playhead_var.set(t_ms / total)
+                    if total > 0 and not self._playhead_hold(): self.playhead_var.set(t_ms / total)
                 else: self.time_label.config(text="")
             elif ch.is_local and state == vlc.State.Playing and self._local_track_order:
                 if t_ms >= 0:
@@ -4238,7 +4259,7 @@ class RetroTV(tk.Tk):
                     else:
                         track_disp = min(self._local_track_idx + 1, len(self._local_track_order))
                         self.time_label.config(text=f"{t_str}/{tot_str}  [{track_disp}/{len(self._local_track_order)}]")
-                    if total > 0 and not self._playhead_dragging: self.playhead_var.set(t_ms / total)
+                    if total > 0 and not self._playhead_hold(): self.playhead_var.set(t_ms / total)
                 else: self.time_label.config(text="")
             elif not ch.is_local and not getattr(self, '_dvr_playing_path', None):
                 if self._live_error_count == 0: self.time_label.config(text="LIVE")
@@ -8144,8 +8165,16 @@ class RetroTV(tk.Tk):
         elif action == "seek":                # value = position in 0..1000 (permille)
             if self.player and ch and (ch.is_local or getattr(self, '_dvr_playing_path', None)):
                 frac = max(0, min(1000, value)) / 1000.0
-                self.playhead_var.set(frac)
-                self._vlc_cmd('seek_frac', frac)
+                self._seek_to_frac(frac)
+        elif action == "seek_ms":             # value = absolute position in milliseconds
+            if self.player and ch and (ch.is_local or getattr(self, '_dvr_playing_path', None)):
+                total = int(getattr(self, '_vlc_len_ms', 0) or 0)
+                ms = max(0, value)
+                if total > 0:
+                    ms = min(ms, total)
+                    self.playhead_var.set(ms / total)
+                self._seek_hold_until = _time.monotonic() + 1.5
+                self._vlc_cmd('seek_ms', ms)
         elif action == "set_volume":
             vol = max(0, min(100, value))
             self.vol_var.set(vol); self._set_volume(vol); self._show_volume_osd(vol)

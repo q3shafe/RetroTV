@@ -16,8 +16,8 @@ API (all /api/* need the token via 'X-Token' header or '?t=' query):
   GET  /api/guide      schedule grid for all channels (built on demand)
   POST /api/cmd        {"action": "next|prev|vol_up|vol_down|mute|play_pause|
                                    stop|fullscreen|favorite|guide|record|
-                                   set_volume|tune|prev_track|next_track|seek",
-                        "value": ...}   (seek value = 0..1000 permille)
+                                   set_volume|tune|prev_track|next_track|seek|seek_ms",
+                        "value": ...}   (seek = 0..1000 permille, seek_ms = milliseconds)
 """
 import hmac
 import html
@@ -32,7 +32,7 @@ from urllib.parse import urlparse, parse_qs
 
 ACTIONS = {"next", "prev", "vol_up", "vol_down", "mute", "play_pause", "stop",
            "fullscreen", "favorite", "guide", "record", "set_volume", "tune",
-           "prev_track", "next_track", "seek"}
+           "prev_track", "next_track", "seek", "seek_ms"}
 MAX_BODY = 4096
 
 
@@ -131,7 +131,7 @@ class RemoteServer:
                     if action not in ACTIONS:
                         return self._json(400, {"error": "unknown action"})
                     value = msg.get("value")
-                    if action in ("set_volume", "tune", "seek"):
+                    if action in ("set_volume", "tune", "seek", "seek_ms"):
                         value = int(value)
                     server.cmd_queue.put_nowait((action, value))
                 except queue.Full:
@@ -572,7 +572,10 @@ function render(s){
   $("pbar").style.width = ((s.progress || 0) * 100) + "%";
   if (seekable) {
     seekLen = s.length_ms; $("ttot").textContent = fmt(s.length_ms);
-    if (!seekBusy) { $("seek").value = Math.round(s.position * 1000); $("tcur").textContent = fmt(s.time_ms); }
+    // One slider step per second of media (was 1/1000 of the file, i.e. ~7 s on a 2 h movie)
+    var smax = Math.max(1, Math.round(s.length_ms / 1000));
+    if (String(smax) !== $("seek").max) $("seek").max = smax;
+    if (!seekBusy) { $("seek").value = Math.round(s.time_ms / 1000); $("tcur").textContent = fmt(s.time_ms); }
   }
   $("recnote").hidden = !s.recording;
 
@@ -756,8 +759,13 @@ var vol = $("vol");
 vol.addEventListener("input", function(){ volBusy = true; $("volv").textContent = vol.value; });
 vol.addEventListener("change", function(){ cmd("set_volume", parseInt(vol.value, 10)); setTimeout(function(){ volBusy = false; }, 600); });
 var seek = $("seek");
-seek.addEventListener("input", function(){ seekBusy = true; $("tcur").textContent = fmt(seekLen * seek.value / 1000); });
-seek.addEventListener("change", function(){ cmd("seek", parseInt(seek.value, 10)); setTimeout(function(){ seekBusy = false; }, 1500); });
+var seekTimer = null;
+seek.addEventListener("input", function(){ seekBusy = true; clearTimeout(seekTimer); $("tcur").textContent = fmt(parseInt(seek.value, 10) * 1000); });
+seek.addEventListener("change", function(){
+  clearTimeout(seekTimer);
+  cmd("seek_ms", parseInt(seek.value, 10) * 1000);
+  seekTimer = setTimeout(function(){ seekBusy = false; }, 2500);
+});
 
 function savePair(){ TOKEN = $("code").value.trim(); try { localStorage.setItem("rtv_token", TOKEN); } catch (e) {} start(); }
 $("connect").onclick = savePair;
